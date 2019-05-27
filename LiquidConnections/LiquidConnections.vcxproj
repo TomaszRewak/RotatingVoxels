@@ -153,6 +153,16 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stl\stl-loader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shepes\face.h" />
+    <ClInclude Include="shepes\shape.h" />
+    <ClInclude Include="shepes\vector.h" />
+    <ClInclude Include="shepes\vertex.h" />
+    <ClInclude Include="stl\stl-loader.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.targets" />
