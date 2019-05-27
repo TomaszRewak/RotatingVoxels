@@ -8,62 +8,32 @@ namespace LiquidConnections {
 		Shapes::Shape ShapeLoader::load(std::experimental::filesystem::path path)
 		{
 			std::ifstream file(path);
+			std::string fileContent(
+				(std::istreambuf_iterator<char>(file)),
+				(std::istreambuf_iterator<char>()));
 
-			loadHeader(file);
-
-			return loadShape(file);
+			return loadShape(fileContent);
 		}
 
-		void ShapeLoader::loadHeader(std::ifstream & file)
+		Shapes::Shape ShapeLoader::loadShape(std::string & file)
 		{
-			std::string _;
-			std::getline(file, _);
-		}
+			std::regex pattern(R"(facet\s+normal\s+(\S+)\s+(\S+)\s+(\S+)\s+outer loop\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+endloop\s+endfacet)");
+			std::smatch match;
 
-		Shapes::Shape ShapeLoader::loadShape(std::ifstream & file)
-		{
 			Shapes::Shape shape;
 
-			while (file.eof)
+			auto fileBegin = file.cbegin();
+			while (std::regex_search(fileBegin, file.cend(), match, pattern))
 			{
-				auto face = loadFace(file);
-				shape.faces.push_back(face);
+				shape.faces.push_back(Shapes::Face{
+					Shapes::Vertex(std::stof(match[4]), std::stof(match[5]), std::stof(match[6])),
+					Shapes::Vertex(std::stof(match[7]), std::stof(match[8]), std::stof(match[9])),
+					Shapes::Vertex(std::stof(match[10]), std::stof(match[11]), std::stof(match[12])),
+					Shapes::Vector(std::stof(match[1]), std::stof(match[2]), std::stof(match[3]))
+				});
 			}
 
 			return shape;
-		}
-
-		Shapes::Face ShapeLoader::loadFace(std::ifstream & file)
-		{
-			// facet\s+normal\s+(\S+)\s+(\S+)\s+(\S+)([\s\S]*?)endfacet
-
-			std::string _;
-
-			file >> _;
-			if (_ != "outer") throw std::exception();
-			file >> _;
-			if (_ != "loop") throw std::exception();
-
-			Shapes::Vertex
-				a = loadVertex(file),
-				b = loadVertex(file),
-				c = loadVertex(file);
-
-			file >> _;
-			if (_ != "endloop") throw std::exception();
-
-			return Shapes::Face(a, b, c);
-		}
-
-		Shapes::Vertex ShapeLoader::loadVertex(std::ifstream & file)
-		{
-			std::string _;
-			float x, y, z;
-
-			file >> _ >> x >> y >> z;
-			if (_ != "vertex") throw std::exception();
-
-			return Shapes::Vertex(x, y, z);
 		}
 	}
 }
