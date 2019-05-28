@@ -11,8 +11,11 @@ namespace LiquidConnections
 	{
 		struct Face
 		{
-			std::array<Vertex, 3> vertices;
+			Vertex vertices[3];
 			Vector normal;
+
+			Face()
+			{ }
 
 			Face(Vertex a, Vertex b, Vertex c, Vector normal) :
 				vertices{ a, b, c },
