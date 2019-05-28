@@ -5,6 +5,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stl\stl-loader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stl\stl-loader.h" />
@@ -12,5 +14,6 @@
     <ClInclude Include="shepes\face.h" />
     <ClInclude Include="shepes\vertex.h" />
     <ClInclude Include="shepes\vector.h" />
+    <ClInclude Include="ui\ui.h" />
   </ItemGroup>
 </Project>
