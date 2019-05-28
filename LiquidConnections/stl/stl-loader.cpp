@@ -7,29 +7,50 @@ namespace LiquidConnections {
 	namespace Stl {
 		Shapes::Shape ShapeLoader::load(std::experimental::filesystem::path path)
 		{
-			std::ifstream file(path);
-			std::string fileContent(
-				(std::istreambuf_iterator<char>(file)),
-				(std::istreambuf_iterator<char>()));
+			std::ifstream file(path, std::ios::in | std::ios::binary);
+			file.seekg(80);
 
-			return loadShape(fileContent);
+			return loadShape(file);
 		}
 
-		Shapes::Shape ShapeLoader::loadShape(std::string & file)
+		Shapes::Shape ShapeLoader::loadShape(std::ifstream& file)
 		{
-			std::regex pattern(R"(facet\s+normal\s+(\S+)\s+(\S+)\s+(\S+)\s+outer loop\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+vertex\s+(\S+)\s+(\S+)\s+(\S+)\s+endloop\s+endfacet)");
-			std::smatch match;
-
 			Shapes::Shape shape;
 
-			auto fileBegin = file.cbegin();
-			while (std::regex_search(fileBegin, file.cend(), match, pattern))
+			int faces;
+			file.read((char*)&faces, 4);
+
+			for (int i = 0; i < faces; i++)
 			{
+				float xn, yn, zn;
+				float x1, y1, z1;
+				float x2, y2, z2;
+				float x3, y3, z3;
+				int _;
+
+				file.read((char*)&xn, 4);
+				file.read((char*)&yn, 4);
+				file.read((char*)&zn, 4);
+
+				file.read((char*)&x1, 4);
+				file.read((char*)&y1, 4);
+				file.read((char*)&z1, 4);
+
+				file.read((char*)&x2, 4);
+				file.read((char*)&y2, 4);
+				file.read((char*)&z2, 4);
+
+				file.read((char*)&x3, 4);
+				file.read((char*)&y3, 4);
+				file.read((char*)&z3, 4);
+
+				file.read((char*)&_, 2);
+
 				shape.faces.push_back(Shapes::Face{
-					Shapes::Vertex(std::stof(match[4]), std::stof(match[5]), std::stof(match[6])),
-					Shapes::Vertex(std::stof(match[7]), std::stof(match[8]), std::stof(match[9])),
-					Shapes::Vertex(std::stof(match[10]), std::stof(match[11]), std::stof(match[12])),
-					Shapes::Vector(std::stof(match[1]), std::stof(match[2]), std::stof(match[3]))
+					Shapes::Vertex(x1, y1, z1),
+					Shapes::Vertex(x2, y2, z2),
+					Shapes::Vertex(x3, y3, z3),
+					Shapes::Vector(xn, yn, zn)
 				});
 			}
 

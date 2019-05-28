@@ -15,7 +15,7 @@ namespace LiquidConnections
 			static Shapes::Shape load(std::experimental::filesystem::path path);
 
 		private:
-			static Shapes::Shape loadShape(std::string& file);
+			static Shapes::Shape loadShape(std::ifstream& file);
 		};
 	}
 }
