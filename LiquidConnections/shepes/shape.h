@@ -11,7 +11,7 @@ namespace LiquidConnections
 		struct Shape
 		{
 			std::size_t facesCount;
-			Face* faces;
+			std::vector<Face> faces;
 		};
 	}
 }

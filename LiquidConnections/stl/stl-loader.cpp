@@ -17,32 +17,41 @@ namespace LiquidConnections {
 		{
 			Shapes::Shape shape;
 
-			file.read((char*)&shape.facesCount, 4);
-			
-			shape.faces = new Shapes::Face[shape.facesCount];
+			int faces;
+			file.read((char*)&faces, 4);
 
-			for (int i = 0; i < shape.facesCount; i++)
+			for (int i = 0; i < faces; i++)
 			{
-				auto& face = shape.faces[i];
-
-				file.read((char*)&face.normal.x, 4);
-				file.read((char*)&face.normal.y, 4);
-				file.read((char*)&face.normal.z, 4);
-
-				file.read((char*)&face.vertices[0].x, 4);
-				file.read((char*)&face.vertices[0].y, 4);
-				file.read((char*)&face.vertices[0].z, 4);
-
-				file.read((char*)&face.vertices[1].x, 4);
-				file.read((char*)&face.vertices[1].y, 4);
-				file.read((char*)&face.vertices[1].z, 4);
-
-				file.read((char*)&face.vertices[2].x, 4);
-				file.read((char*)&face.vertices[2].y, 4);
-				file.read((char*)&face.vertices[2].z, 4);
-
+				float xn, yn, zn;
+				float x1, y1, z1;
+				float x2, y2, z2;
+				float x3, y3, z3;
 				int _;
+
+				file.read((char*)&xn, 4);
+				file.read((char*)&yn, 4);
+				file.read((char*)&zn, 4);
+
+				file.read((char*)&x1, 4);
+				file.read((char*)&y1, 4);
+				file.read((char*)&z1, 4);
+
+				file.read((char*)&x2, 4);
+				file.read((char*)&y2, 4);
+				file.read((char*)&z2, 4);
+
+				file.read((char*)&x3, 4);
+				file.read((char*)&y3, 4);
+				file.read((char*)&z3, 4);
+
 				file.read((char*)&_, 2);
+
+				shape.faces.push_back(Shapes::Face{
+					Shapes::Vertex(x1, y1, z1),
+					Shapes::Vertex(x2, y2, z2),
+					Shapes::Vertex(x3, y3, z3),
+					Shapes::Vector(xn, yn, zn)
+				});
 			}
 
 			return shape;
