@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <fstream>
 
-#include "../shepes/shape.h"
+#include "../shapes/shape.h"
 
 namespace LiquidConnections
 {

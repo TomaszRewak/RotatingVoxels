@@ -176,14 +176,16 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stl\stl-loader.cpp" />
     <ClCompile Include="ui\ui.cpp" />
+    <ClCompile Include="voxel\voxel-space.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shepes\face.h" />
-    <ClInclude Include="shepes\shape.h" />
-    <ClInclude Include="shepes\vector.h" />
-    <ClInclude Include="shepes\vertex.h" />
+    <ClInclude Include="shapes\face.h" />
+    <ClInclude Include="shapes\shape.h" />
+    <ClInclude Include="shapes\vector.h" />
+    <ClInclude Include="shapes\vertex.h" />
     <ClInclude Include="stl\stl-loader.h" />
     <ClInclude Include="ui\ui.h" />
+    <ClInclude Include="voxel\voxel-space.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
