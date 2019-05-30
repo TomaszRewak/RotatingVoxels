@@ -2,25 +2,22 @@
 
 #include "../shapes/face.h"
 
-namespace LiquidConnections
+namespace Voxel
 {
-	namespace Voxel
+	template<size_t X, size_t Y, size_t Z>
+	class VoxelSpace
 	{
-		template<size_t X, size_t Y, size_t Z>
-		class VoxelSpace
-		{
-		public:
-			static size_t x = X;
-			static size_t y = Y;
-			static size_t z = Z;
+	public:
+		static size_t x = X;
+		static size_t y = Y;
+		static size_t z = Z;
 
-			VoxelSpace();
+		VoxelSpace();
 
-			void add(const Shapes::Face& face);
-			void intersect(const Shapes::Vector& ray);
+		void add(const Shapes::Face& face);
+		void intersect(const Shapes::Vector& ray);
 
-		private:
-			float values[X][Y][Z];
-		};
-	}
+	private:
+		float values[X][Y][Z];
+	};
 }

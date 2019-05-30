@@ -5,17 +5,14 @@
 
 #include "../shapes/shape.h"
 
-namespace LiquidConnections
+namespace Stl
 {
-	namespace Stl
+	class ShapeLoader
 	{
-		class ShapeLoader
-		{
-		public:
-			static Shapes::Shape load(std::experimental::filesystem::path path);
+	public:
+		static Shapes::Shape load(std::experimental::filesystem::path path);
 
-		private:
-			static Shapes::Shape loadShape(std::ifstream& file);
-		};
-	}
+	private:
+		static Shapes::Shape loadShape(std::ifstream& file);
+	};
 }

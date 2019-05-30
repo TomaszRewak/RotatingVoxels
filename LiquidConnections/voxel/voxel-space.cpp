@@ -1,7 +1,7 @@
 #include "voxel-space.h"
 
 template<size_t X, size_t Y, size_t Z>
-LiquidConnections::Voxel::VoxelSpace<X, Y, Z>::VoxelSpace()
+Voxel::VoxelSpace<X, Y, Z>::VoxelSpace()
 {
 	for (int i = 0; i < X; i++)
 		for (int j = 0; j < Y; j++)
@@ -10,7 +10,7 @@ LiquidConnections::Voxel::VoxelSpace<X, Y, Z>::VoxelSpace()
 }
 
 template<size_t X, size_t Y, size_t Z>
-LiquidConnections::Voxel::VoxelSpace<X, Y, Z>::add(const LiquidConnections::Shapes::Face& face)
+Voxel::VoxelSpace<X, Y, Z>::add(const Shapes::Face& face)
 {
-
+	
 }

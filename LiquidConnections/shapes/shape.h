@@ -4,14 +4,11 @@
 
 #include "face.h"
 
-namespace LiquidConnections
+namespace Shapes
 {
-	namespace Shapes
+	struct Shape
 	{
-		struct Shape
-		{
-			std::size_t facesCount;
-			std::vector<Face> faces;
-		};
-	}
+		std::size_t facesCount;
+		std::vector<Face> faces;
+	};
 }

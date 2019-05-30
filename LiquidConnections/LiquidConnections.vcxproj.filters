@@ -8,6 +8,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\ui.cpp" />
     <ClCompile Include="voxel\voxel-space.cpp" />
+    <ClCompile Include="shapes\vector.cpp" />
+    <ClCompile Include="shapes\face.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stl\stl-loader.h" />

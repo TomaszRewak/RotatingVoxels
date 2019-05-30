@@ -1,23 +1,20 @@
 #pragma once
 
-namespace LiquidConnections
+namespace Shapes
 {
-	namespace Shapes
+	struct Vertex
 	{
-		struct Vertex
-		{
-			float x;
-			float y;
-			float z;
+		float x;
+		float y;
+		float z;
 
-			Vertex() 
-			{ }
+		Vertex()
+		{ }
 
-			Vertex(float x, float y, float z) :
-				x(x),
-				y(y),
-				z(z)
-			{ }
-		};
-	}
+		Vertex(float x, float y, float z) :
+			x(x),
+			y(y),
+			z(z)
+		{ }
+	};
 }

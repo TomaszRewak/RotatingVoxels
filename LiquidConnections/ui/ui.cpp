@@ -5,7 +5,7 @@
 #include <GL/freeglut.h>
 #include <GL/glew.h>
 
-void LiquidConnections::UI::init(int argc, char **argv)
+void UI::init(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 

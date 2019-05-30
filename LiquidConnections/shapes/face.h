@@ -5,22 +5,21 @@
 #include "vertex.h"
 #include "vector.h"
 
-namespace LiquidConnections
+namespace Shapes
 {
-	namespace Shapes
+	struct Face
 	{
-		struct Face
-		{
-			Vertex vertices[3];
-			Vector normal;
+		Vertex vertices[3];
+		Vector normal;
 
-			Face()
-			{ }
+		Face()
+		{ }
 
-			Face(Vertex a, Vertex b, Vertex c, Vector normal) :
-				vertices{ a, b, c },
-				normal(normal)
-			{ }
-		};
-	}
+		Face(Vertex a, Vertex b, Vertex c, Vector normal) :
+			vertices{ a, b, c },
+			normal(normal)
+		{ }
+
+		bool intersect(const Vector& vector, Vertex& intersection) const;
+	};
 }
