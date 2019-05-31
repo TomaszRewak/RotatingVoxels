@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stack>
+
 #include "../shapes/face.h"
+#include "voxel-coordinates.h"
 
 namespace Voxel
 {
@@ -8,14 +11,29 @@ namespace Voxel
 	class VoxelSpace
 	{
 	public:
-		static size_t x = X;
-		static size_t y = Y;
-		static size_t z = Z;
+		static size_t DimX = X;
+		static size_t DimY = Y;
+		static size_t DimZ = Z;
 
-		VoxelSpace();
+		VoxelSpace()
+		{
+			for (int i = 0; i < X; i++)
+				for (int j = 0; j < Y; j++)
+					for (int k = 0; k < Z; k++)
+						values[i][j][k] = std::numeric_limits<float>::max();
+		}
 
-		void add(const Shapes::Face& face);
-		void intersect(const Shapes::Vector& ray);
+		bool inside(VoxelCoordinates coordinates)
+		{
+			return
+				coordinates.x >= 0 && coordinates.y >= 0 && coordinates.z >= 0 &&
+				coordinates.x < X && coordinates.y < Y && coordinates.z < Z;
+		}
+
+		float& operator[](const VoxelCoordinates& coordinates)
+		{
+			return values[coordinates.x][coordinates.y][coordinates.z];
+		}
 
 	private:
 		float values[X][Y][Z];

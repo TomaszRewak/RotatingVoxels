@@ -7,9 +7,9 @@
     <ClCompile Include="stl\stl-loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\ui.cpp" />
-    <ClCompile Include="voxel\voxel-space.cpp" />
     <ClCompile Include="shapes\vector.cpp" />
     <ClCompile Include="shapes\face.cpp" />
+    <ClCompile Include="shapes\ray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stl\stl-loader.h" />
@@ -19,5 +19,9 @@
     <ClInclude Include="shapes\shape.h" />
     <ClInclude Include="shapes\vector.h" />
     <ClInclude Include="shapes\vertex.h" />
+    <ClInclude Include="shapes\ray.h" />
+    <ClInclude Include="voxel\voxel-coordinates.h" />
+    <ClInclude Include="voxel\voxel-space-builder.h" />
+    <ClInclude Include="voxel\voxel-shape-preprocesor.h" />
   </ItemGroup>
 </Project>

@@ -2,8 +2,7 @@
 
 #include <array>
 
-#include "vertex.h"
-#include "vector.h"
+#include "ray.h"
 
 namespace Shapes
 {
@@ -20,6 +19,14 @@ namespace Shapes
 			normal(normal)
 		{ }
 
-		bool intersect(const Vector& vector, Vertex& intersection) const;
+		float minX() const;
+		float minY() const;
+		float minZ() const;
+
+		float maxX() const;
+		float maxY() const;
+		float maxZ() const;
+
+		bool intersect(const Ray& ray, Vertex& intersection) const;
 	};
 }
