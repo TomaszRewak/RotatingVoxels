@@ -20,7 +20,7 @@ namespace Voxel
 			z(z)
 		{ }
 
-		VoxelCoordinates move(int dx, int dy, int dz)
+		VoxelCoordinates move(int dx, int dy, int dz) const
 		{
 			return VoxelCoordinates(x + dx, y + dy, z + dz);
 		}

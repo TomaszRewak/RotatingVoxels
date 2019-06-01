@@ -16,5 +16,10 @@ namespace Shapes
 			y(y),
 			z(z)
 		{ }
+
+		Vertex operator*(float by) const
+		{
+			return Vertex(x * by, y * by, z * by);
+		}
 	};
 }

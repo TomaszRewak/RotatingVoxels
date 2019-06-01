@@ -3,6 +3,8 @@
 #include "voxel-space.h"
 #include "../shapes/shape.h"
 
+#include <algorithm>
+
 namespace Voxel
 {
 	template<size_t X, size_t Y, size_t Z>
@@ -13,8 +15,6 @@ namespace Voxel
 
 		void add(const Shapes::Shape& shape)
 		{
-			std::shuffle(shape.faces.begin(), shape.faces.end());
-
 			for (const auto& face : shape.faces)
 				add(face);
 		}
@@ -22,32 +22,32 @@ namespace Voxel
 	private:
 		void add(const Shapes::Face& face)
 		{
-			int minX = std::max(face.minX(), 0),
-				minY = std::max(face.minY(), 0),
-				minZ = std::max(face.minZ(), 0),
-				maxX = std::min(face.maxX(), X),
-				maxY = std::min(face.maxY(), Y),
-				maxZ = std::min(face.maxZ(), Z);
+			int minX = std::max((int)face.minX(), 0),
+				minY = std::max((int)face.minY(), 0),
+				minZ = std::max((int)face.minZ(), 0),
+				maxX = std::min((int)face.maxX() + 1, (int)X),
+				maxY = std::min((int)face.maxY() + 1, (int)Y),
+				maxZ = std::min((int)face.maxZ() + 1, (int)Z);
 
 			Shapes::Vertex intersection;
 
 			for (int x = minX; x < maxX; x++)
-				for (int y = minY, y < maxY; y++)
+				for (int y = minY; y < maxY; y++)
 					if (face.intersect(Shapes::Ray(Shapes::Vertex(x, y, -1), Shapes::Vector(0, 0, 1)), intersection))
 						addZ(x, y, face, intersection);
 
 			for (int x = minX; x < maxX; x++)
-				for (int z = minZ, z < maxZ; z++)
+				for (int z = minZ; z < maxZ; z++)
 					if (face.intersect(Shapes::Ray(Shapes::Vertex(x, -1, z), Shapes::Vector(0, 1, 0)), intersection))
 						addY(x, z, face, intersection);
 
 			for (int y = minY; y < maxY; y++)
-				for (int z = minZ, z < maxZ; z++)
+				for (int z = minZ; z < maxZ; z++)
 					if (face.intersect(Shapes::Ray(Shapes::Vertex(-1, y, z), Shapes::Vector(1, 0, 0)), intersection))
 						addX(y, z, face, intersection);
 		}
 
-		void getDistance(float d, float normal)
+		float getDistance(float d, float normal)
 		{
 			return normal < 0 ? d : -d;
 		}
@@ -81,31 +81,33 @@ namespace Voxel
 
 		void add(const VoxelCoordinates& coordinates, float distance, const Shapes::Vertex& intersection)
 		{
+			if (!voxelSpace.inside(coordinates))
+				return;
+
 			if (voxelSpace[coordinates] < distance)
 				return;
 
 			voxelSpace[coordinates] = distance;
 
-			propagate(coordinates, intersection);
+			//propagate(coordinates, intersection);
 		}
 
 		void propagate(const VoxelCoordinates& coordinates, const Shapes::Vertex& intersection)
 		{
-			std::stack<VoxelCoordinates> points{
-				coordinates.move(1, 0, 0),
-				coordinates.move(-1, 0, 0),
-				coordinates.move(0, 1, 0),
-				coordinates.move(0, -1, 0),
-				coordinates.move(0, 0, 1),
-				coordinates.move(0, 0, -1)
-			};
+			std::stack<VoxelCoordinates> points;
+			points.push(coordinates.move(1, 0, 0));
+			points.push(coordinates.move(-1, 0, 0));
+			points.push(coordinates.move(0, 1, 0));
+			points.push(coordinates.move(0, -1, 0));
+			points.push(coordinates.move(0, 0, 1));
+			points.push(coordinates.move(0, 0, -1));
 
 			while (!points.empty())
 			{
 				VoxelCoordinates point = points.top();
 				points.pop();
 
-				if (!inside(point))
+				if (!voxelSpace.inside(point))
 					continue;
 
 				float distance = std::sqrt(

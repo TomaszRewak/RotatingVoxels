@@ -34,7 +34,7 @@ float Shapes::Face::maxZ() const
 
 bool Shapes::Face::intersect(const Ray& ray, Vertex& intersection) const
 {
-	const float epsilon = 0.0000001;
+	const float epsilon = 0.0000001f;
 
 	const Vector edge1 = Vector(vertices[0], vertices[1]);
 	const Vector edge2 = Vector(vertices[0], vertices[2]);
@@ -45,7 +45,7 @@ bool Shapes::Face::intersect(const Ray& ray, Vertex& intersection) const
 	if (dotProduct > -epsilon && dotProduct < epsilon)
 		return false;
 
-	const float invertedDotProduct = 1.0 / dotProduct;
+	const float invertedDotProduct = 1.0f / dotProduct;
 	const Vector vector0 = Vector(vertices[0], ray.origin);
 	const float u = invertedDotProduct * vector0.dotProduct(crossProduct);
 

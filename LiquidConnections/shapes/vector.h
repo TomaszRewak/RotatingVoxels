@@ -30,6 +30,6 @@ namespace Shapes
 
 		Vector operator*(float by) const;
 	};
-
-	Vertex operator+(const Vertex& vertex, const Vector& vector);
 }
+
+Shapes::Vertex operator+(const Shapes::Vertex& vertex, const Shapes::Vector& vector);

@@ -11,11 +11,16 @@ namespace Voxel
 	class VoxelSpace
 	{
 	public:
-		static size_t DimX = X;
-		static size_t DimY = Y;
-		static size_t DimZ = Z;
+		const size_t DimX = X;
+		const size_t DimY = Y;
+		const size_t DimZ = Z;
 
 		VoxelSpace()
+		{
+			clear();
+		}
+
+		void clear()
 		{
 			for (int i = 0; i < X; i++)
 				for (int j = 0; j < Y; j++)
@@ -23,7 +28,7 @@ namespace Voxel
 						values[i][j][k] = std::numeric_limits<float>::max();
 		}
 
-		bool inside(VoxelCoordinates coordinates)
+		bool inside(const VoxelCoordinates& coordinates)
 		{
 			return
 				coordinates.x >= 0 && coordinates.y >= 0 && coordinates.z >= 0 &&
