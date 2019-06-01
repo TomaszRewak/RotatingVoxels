@@ -23,5 +23,6 @@
     <ClInclude Include="voxel\voxel-coordinates.h" />
     <ClInclude Include="voxel\voxel-space-builder.h" />
     <ClInclude Include="voxel\voxel-shape-preprocesor.h" />
+    <ClInclude Include="voxel\voxel-parser.h" />
   </ItemGroup>
 </Project>

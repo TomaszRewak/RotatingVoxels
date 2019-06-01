@@ -11,7 +11,12 @@ namespace Voxel
 	class VoxelSpaceBuilder
 	{
 	public:
-		VoxelSpace<X, Y, Z> voxelSpace;
+		std::shared_ptr<VoxelSpace<X, Y, Z>> voxelSpace;
+
+		void init()
+		{
+			voxelSpace = std::make_shared<VoxelSpace<X, Y, Z>>();
+		}
 
 		void add(const Shapes::Shape& shape)
 		{
@@ -81,13 +86,13 @@ namespace Voxel
 
 		void add(const VoxelCoordinates& coordinates, float distance, const Shapes::Vertex& intersection)
 		{
-			if (!voxelSpace.inside(coordinates))
+			if (!voxelSpace->inside(coordinates))
 				return;
 
-			if (voxelSpace[coordinates] < distance)
+			if ((*voxelSpace)[coordinates] < distance)
 				return;
 
-			voxelSpace[coordinates] = distance;
+			(*voxelSpace)[coordinates] = distance;
 
 			//propagate(coordinates, intersection);
 		}

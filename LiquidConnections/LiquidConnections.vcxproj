@@ -189,6 +189,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="stl\stl-loader.h" />
     <ClInclude Include="ui\ui.h" />
     <ClInclude Include="voxel\voxel-coordinates.h" />
+    <ClInclude Include="voxel\voxel-parser.h" />
     <ClInclude Include="voxel\voxel-shape-preprocesor.h" />
     <ClInclude Include="voxel\voxel-space.h" />
     <ClInclude Include="voxel\voxel-space-builder.h" />

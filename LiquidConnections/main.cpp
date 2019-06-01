@@ -2,6 +2,7 @@
 #include "stl/stl-loader.h"
 #include "voxel/voxel-shape-preprocesor.h"
 #include "voxel/voxel-space-builder.h"
+#include "voxel/voxel-parser.h"
 
 #include <GL/freeglut.h>
 
@@ -124,10 +125,11 @@ int main(int argc, char **argv)
 	auto model = Stl::ShapeLoader::load("../examples/bunny.stl");
 	auto scaledModel = Voxel::VoxelShapePreprocesor::normalizeShape<X, Y, Z>(model);
 	
-	auto voxelSpaceBuilder = std::make_shared<Voxel::VoxelSpaceBuilder<X, Y, Z>>();
-	voxelSpaceBuilder->add(scaledModel);
+	Voxel::VoxelSpaceBuilder<X, Y, Z> voxelSpaceBuilder;
+	voxelSpaceBuilder.init();
+	voxelSpaceBuilder.add(scaledModel);
 
-	shape = Voxel::VoxelShapePreprocesor::normalizeShape<2, 2, 2>(model);
+	shape = Voxel::VoxelShapePreprocesor::normalizeShape<2, 2, 2>(Voxel::VoxelParser::createShape(*voxelSpaceBuilder.voxelSpace));
 
 	//UI::init(argc, argv);
 

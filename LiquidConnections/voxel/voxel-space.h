@@ -40,6 +40,11 @@ namespace Voxel
 			return values[coordinates.x][coordinates.y][coordinates.z];
 		}
 
+		const float& operator[](const VoxelCoordinates& coordinates) const
+		{
+			return values[coordinates.x][coordinates.y][coordinates.z];
+		}
+
 	private:
 		float values[X][Y][Z];
 	};
