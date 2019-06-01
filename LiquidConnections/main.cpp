@@ -9,8 +9,16 @@ char title[] = "3D Shapes";
 
 Shapes::Shape shape;
 
+GLfloat light_diffuse[] = { 1.0, 0.0, 0.0, 1.0 };  /* Red diffuse light. */
+GLfloat light_position[] = { 1.0, 1.0, -3.0, 0.0 };  /* Infinite light location. */
+
 /* Initialize OpenGL Graphics */
 void initGL() {
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
 	glClearDepth(1.0f);                   // Set background depth to farthest
 	glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
@@ -77,20 +85,17 @@ void display() {
 			  // Render a pyramid consists of 4 triangles
 	glLoadIdentity();                  // Reset the model-view matrix
 	glTranslatef(-1.5f, 0.0f, -6.0f);  // Move left and into the screen
-
-	glBegin(GL_TRIANGLES);           
+          
 	
 	for (const auto& face : shape.faces)
 	{
-		glColor3f(1.0f, 0.0f, 0.0f);     // Red
-		glVertex3f(face.vertices[0].x - 1, face.vertices[0].y - 1, face.vertices[0].y - 1);
-		glColor3f(0.0f, 1.0f, 0.0f);     // Green
-		glVertex3f(face.vertices[1].x - 1, face.vertices[1].y - 1, face.vertices[1].y - 1);
-		glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-		glVertex3f(face.vertices[2].x - 1, face.vertices[2].y - 1, face.vertices[2].y - 1);
+		glBegin(GL_TRIANGLES);
+		glNormal3f(face.normal.x, face.normal.y, face.normal.z);
+		glVertex3f(face.vertices[0].x - 1, face.vertices[0].y - 1, face.vertices[0].z - 1);
+		glVertex3f(face.vertices[1].x - 1, face.vertices[1].y - 1, face.vertices[1].z - 1);
+		glVertex3f(face.vertices[2].x - 1, face.vertices[2].y - 1, face.vertices[2].z - 1);
+		glEnd();
 	}
-
-	glEnd();   // Done drawing the pyramid
 
 	glutSwapBuffers();  // Swap the front and back frame buffers (double buffering)
 }
