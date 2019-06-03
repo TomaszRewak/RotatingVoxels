@@ -1,5 +1,6 @@
 ﻿using Alea;
 using Alea.CSharp;
+using LiquidConnections.Geometry;
 using LiquidConnections.Stl;
 using OpenGL;
 using OpenGL.CoreUI;
@@ -71,6 +72,8 @@ namespace LiquidConnections
 			return result;
 		}
 
+		static Face[] bunny;
+
 		static void Main(string[] args)
 		{
 			//Stopwatch stopwatch;
@@ -97,19 +100,19 @@ namespace LiquidConnections
 			//stopwatch.Stop();
 			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-			var bunny = StlReader.LoadShape("./Examples/bunny.stl");
+			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
-			//using (NativeWindow nativeWindow = NativeWindow.Create())
-			//{
-			//	nativeWindow.DepthBits = 24;
-			//	nativeWindow.Create(100, 100, 640, 480, NativeWindowStyle.Overlapped);
-			//	nativeWindow.Show();
-			//	nativeWindow.Render += Render;
-			//	nativeWindow.Resize += Resize;
-			//	Initialize();
-			//	Resize(nativeWindow, null);
-			//	nativeWindow.Run();
-			//}
+			using (NativeWindow nativeWindow = NativeWindow.Create())
+			{
+				nativeWindow.DepthBits = 24;
+				nativeWindow.Create(100, 100, 640, 480, NativeWindowStyle.Overlapped);
+				nativeWindow.Show();
+				nativeWindow.Render += Render;
+				nativeWindow.Resize += Resize;
+				Initialize();
+				Resize(nativeWindow, null);
+				nativeWindow.Run();
+			}
 		}
 
 		private static void Resize(object sender, EventArgs e)
@@ -134,7 +137,7 @@ namespace LiquidConnections
 			Gl.MatrixMode(MatrixMode.Modelview);
 
 			Gl.LoadIdentity();
-			Gl.Translate(Math.Sin(offset * 0.001) * 3, Math.Sin(offset * 0.0023) * 3, -7.0f);
+			Gl.Translate(Math.Cos(offset * 0.01) * 3, Math.Cos(offset * 0.023) * 3, -7.0f);
 			offset++;
 
 			Gl.Begin(PrimitiveType.Quads);
@@ -182,15 +185,30 @@ namespace LiquidConnections
 			Gl.End();  // End of drawing color-cube
 
 			Gl.LoadIdentity();
+
+			Gl.Translate(0.0f, 0.0f, -7.0f);
+			Gl.Begin(PrimitiveType.Triangles);
+			for (int i = 0; i < bunny.Length; i++)
+			{
+				ref var face = ref bunny[i];
+
+				Gl.Normal3(face.Normal.X, face.Normal.Y, face.Normal.Z);
+				Gl.Vertex3(face.A.X * 10, face.A.Y * 10, face.A.Z * 10);
+				Gl.Vertex3(face.B.X * 10, face.B.Y * 10, face.B.Z * 10);
+				Gl.Vertex3(face.C.X * 10, face.C.Y * 10, face.C.Z * 10);
+			}
+			Gl.End();
+
+			Gl.LoadIdentity();
 		}
 
 		private static void Initialize()
 		{
-			//Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 1.0f, 0.0f, 0.0f, 1.0f });
-			//Gl.Light(LightName.Light0, LightParameter.Position, new[] { 1.0f, 1.0f, -3.0f, 0.0f });
+			Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 1.0f, 0.3f, 0.3f, 1.0f });
+			Gl.Light(LightName.Light0, LightParameter.Position, new[] { 1.0f, 1.0f, -3.0f, 0.0f });
 
-			//Gl.Enable(EnableCap.Light0);
-			//Gl.Enable(EnableCap.Lighting);
+			Gl.Enable(EnableCap.Light0);
+			Gl.Enable(EnableCap.Lighting);
 
 			Gl.ClearColor(0.2f, 0.2f, 0.0f, 1.0f);
 			Gl.ClearDepth(1.0f);

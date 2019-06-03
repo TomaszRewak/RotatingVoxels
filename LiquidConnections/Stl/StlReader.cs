@@ -28,7 +28,7 @@ namespace LiquidConnections.Stl
 
 			for (int i = 0; i < faces.Length; i++)
 			{
-				var bytes = reader.ReadBytes(48);
+				var bytes = reader.ReadBytes(50);
 				var values = MemoryMarshal.Cast<byte, float>(bytes);
 
 				faces[i] = new Face
