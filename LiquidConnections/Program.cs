@@ -58,11 +58,8 @@ namespace LiquidConnections
 					result[i] = arg1[i] + arg2[j];
 		}
 
-		[GpuManaged]
 		public static int[] RunCPU(int length)
 		{
-			var gpu = Gpu.Default;
-			var lp = new LaunchParam(16, 256);
 			var arg1 = Enumerable.Range(0, length).ToArray();
 			var arg2 = Enumerable.Range(0, length).ToArray();
 			var result = new int[length];
