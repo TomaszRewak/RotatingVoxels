@@ -23,5 +23,10 @@ namespace LiquidConnections.Geometry
 		{
 			return new Vertex(vertex.X + vector.X, vertex.X + vector.Y, vertex.Z + vector.Z);
 		}
+
+		public static Vertex operator -(in Vertex vertex, in Vector vector)
+		{
+			return new Vertex(vertex.X - vector.X, vertex.Y - vector.Y, vertex.Z - vector.Z);
+		}
 	}
 }

@@ -35,9 +35,9 @@ namespace LiquidConnections.VoxelSpace
 			MinY = (int)Math.Ceiling(bounds.MinY);
 			MinZ = (int)Math.Ceiling(bounds.MinZ);
 
-			MaxX = (int)Math.Floor(bounds.MinX);
-			MaxY = (int)Math.Floor(bounds.MinY);
-			MaxZ = (int)Math.Floor(bounds.MinZ);
+			MaxX = (int)Math.Floor(bounds.MaxX);
+			MaxY = (int)Math.Floor(bounds.MaxY);
+			MaxZ = (int)Math.Floor(bounds.MaxZ);
 		}
 
 		public DiscreteBounds Clip(in DiscreteBounds bounds)
@@ -48,9 +48,9 @@ namespace LiquidConnections.VoxelSpace
 				MinY = Math.Max(MinY, bounds.MinY),
 				MinZ = Math.Max(MinZ, bounds.MinZ),
 
-				MaxX = Math.Min(MinX, bounds.MinX),
-				MaxY = Math.Min(MinY, bounds.MinY),
-				MaxZ = Math.Min(MinZ, bounds.MinZ)
+				MaxX = Math.Min(MaxX, bounds.MaxX),
+				MaxY = Math.Min(MaxY, bounds.MaxY),
+				MaxZ = Math.Min(MaxZ, bounds.MaxZ)
 			};
 		}
 
@@ -64,13 +64,13 @@ namespace LiquidConnections.VoxelSpace
 		{
 			return new DiscreteBounds
 			{
-				MinX = MinX + maxXOffset,
-				MinY = MinY + maxYOffset,
-				MinZ = MinZ + maxZOffset,
+				MinX = MinX + minXOffset,
+				MinY = MinY + minYOffset,
+				MinZ = MinZ + minZOffset,
 
-				MaxX = MinX + minXOffset,
-				MaxY = MinY + minYOffset,
-				MaxZ = MinZ + minZOffset
+				MaxX = MaxX + maxXOffset,
+				MaxY = MaxY + maxYOffset,
+				MaxZ = MaxZ + maxZOffset
 			};
 		}
 

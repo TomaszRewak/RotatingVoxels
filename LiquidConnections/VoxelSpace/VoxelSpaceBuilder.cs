@@ -37,18 +37,18 @@ namespace LiquidConnections.VoxelSpace
 		{
 			var bounds = Bounds.Clip(new DiscreteBounds(new Bounds(face)));
 
-			for (int x = bounds.MinX; x < bounds.MaxX; x++)
-				for (int y = bounds.MinY; y < bounds.MaxY; y++)
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
 					if (new Ray(new Vertex(x, y, -1), new Vector(0, 0, 1)).Intersect(face, out var intersection))
 						AddZ(x, y, face, intersection);
 
-			for (int x = bounds.MinX; x < bounds.MaxX; x++)
-				for (int z = bounds.MinZ; z < bounds.MaxZ; z++)
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
 					if (new Ray(new Vertex(x, -1, z), new Vector(0, 1, 0)).Intersect(face, out var intersection))
 						AddY(x, z, face, intersection);
 
-			for (int y = bounds.MinY; y < bounds.MaxY; y++)
-				for (int z = bounds.MinZ; z < bounds.MaxZ; z++)
+			for (int y = bounds.MinY; y <= bounds.MaxY; y++)
+				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
 					if (new Ray(new Vertex(-1, y, z), new Vector(1, 0, 0)).Intersect(face, out var intersection))
 						AddX(y, z, face, intersection);
 		}

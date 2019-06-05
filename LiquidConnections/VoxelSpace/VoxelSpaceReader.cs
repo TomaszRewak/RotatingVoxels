@@ -1,6 +1,7 @@
 ﻿using LiquidConnections.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace LiquidConnections.VoxelSpace
 {
 	static class VoxelSpaceReader
 	{
-		public static List<Face> GenerateShape(float[,,] voxelSpace)
+		public static Face[] GenerateShape(float[,,] voxelSpace)
 		{
 			var faces = new List<Face>();
 			var bounds = new DiscreteBounds(voxelSpace).Offset(0, 0, 0, -1, -1, -1);
@@ -17,7 +18,7 @@ namespace LiquidConnections.VoxelSpace
 			foreach (var coordinates in bounds)
 				GenerateFaces(voxelSpace, coordinates, faces);
 
-			return faces;
+			return faces.ToArray();
 		}
 
 		private static void GenerateFaces(float[,,] voxelSpace, in DiscreteCoordinates coordinates, ICollection<Face> faces)
@@ -88,15 +89,22 @@ namespace LiquidConnections.VoxelSpace
 
 		private static Ray Crossing(float[,,] voxelSpace, in DiscreteEdge edge)
 		{
-			var d1 = voxelSpace.At(edge.Begin);
-			var d2 = voxelSpace.At(edge.End);
+			var normalizedEdge = NormalizeEdge(voxelSpace, edge);
 
-			var point = edge.Begin.AsVertex() + edge.AsVector() * d1 / (d1 + d2);
+			var d1 = voxelSpace.At(normalizedEdge.Begin);
+			var d2 = voxelSpace.At(normalizedEdge.End);
 
-			if (d1 < d2)
-				return new Ray(point, new Vector(edge.Begin.AsVertex(), point));
+			var point = edge.Begin.AsVertex() - normalizedEdge.AsVector() * d1 / (d2 - d1);
+
+			return new Ray(point, new Vector(normalizedEdge.Begin.AsVertex(), point));
+		}
+
+		private static DiscreteEdge NormalizeEdge(float[,,] voxelSpace, in DiscreteEdge edge)
+		{
+			if (voxelSpace.At(edge.Begin) > voxelSpace.At(edge.End))
+				return new DiscreteEdge(edge.End, edge.Begin);
 			else
-				return new Ray(point, new Vector(edge.End.AsVertex(), point));
+				return edge;
 		}
 
 		private static bool ValidateFaceCandidate(in Vector vectorA, in Vector vectorB, in Vector vectorC)

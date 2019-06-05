@@ -1,7 +1,9 @@
 ﻿using Alea;
 using Alea.CSharp;
 using LiquidConnections.Geometry;
+using LiquidConnections.Shapes;
 using LiquidConnections.Stl;
+using LiquidConnections.VoxelSpace;
 using OpenGL;
 using OpenGL.CoreUI;
 using System;
@@ -99,6 +101,11 @@ namespace LiquidConnections
 
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
+			var voxelSpaceBuilder = new VoxelSpaceBuilder(50, 50, 50);
+			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 50, 50, 50)));
+
+			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceBuilder.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
+
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{
 				nativeWindow.DepthBits = 24;
@@ -190,9 +197,9 @@ namespace LiquidConnections
 				ref var face = ref bunny[i];
 
 				Gl.Normal3(face.Normal.X, face.Normal.Y, face.Normal.Z);
-				Gl.Vertex3(face.A.X * 10, face.A.Y * 10, face.A.Z * 10);
-				Gl.Vertex3(face.B.X * 10, face.B.Y * 10, face.B.Z * 10);
-				Gl.Vertex3(face.C.X * 10, face.C.Y * 10, face.C.Z * 10);
+				Gl.Vertex3(face.A.X, face.A.Y, face.A.Z);
+				Gl.Vertex3(face.B.X, face.B.Y, face.B.Z);
+				Gl.Vertex3(face.C.X, face.C.Y, face.C.Z);
 			}
 			Gl.End();
 
