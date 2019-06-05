@@ -93,7 +93,7 @@ namespace LiquidConnections.VoxelSpace
 			var d1 = voxelSpace.At(normalizedEdge.Begin);
 			var d2 = voxelSpace.At(normalizedEdge.End);
 
-			var point = edge.Begin.AsVertex() - normalizedEdge.AsVector() * d1 / (d2 - d1);
+			var point = normalizedEdge.Begin.AsVertex() - normalizedEdge.AsVector() * d1 / (d2 - d1);
 
 			return new Ray(point, new Vector(normalizedEdge.Begin.AsVertex(), point));
 		}

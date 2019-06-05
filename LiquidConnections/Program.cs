@@ -102,7 +102,7 @@ namespace LiquidConnections
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
 			var voxelSpaceBuilder = new VoxelSpaceBuilder(20, 20, 20);
-			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 20, 20, 20)));
+			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(1, 1, 1, 19, 19, 19)));
 
 			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceBuilder.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
 
@@ -196,10 +196,10 @@ namespace LiquidConnections
 			{
 				ref var face = ref bunny[i];
 
-				Gl.Normal3(face.Normal.X, face.Normal.Y, face.Normal.Z);
-				Gl.Vertex3(face.A.X, face.A.Y, face.A.Z);
-				Gl.Vertex3(face.B.X, face.B.Y, face.B.Z);
-				Gl.Vertex3(face.C.X, face.C.Y, face.C.Z);
+				Gl.Normal3(Math.Sin(offset * 0.001) * face.Normal.Z + Math.Cos(offset * 0.001) * face.Normal.X, face.Normal.Y, -Math.Sin(offset * 0.001) * face.Normal.X + Math.Cos(offset * 0.001) * face.Normal.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.001) * face.A.Z + Math.Cos(offset * 0.001) * face.A.X, face.A.Y, -Math.Sin(offset * 0.001) * face.A.X + Math.Cos(offset * 0.001) * face.A.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.001) * face.B.Z + Math.Cos(offset * 0.001) * face.B.X, face.B.Y, -Math.Sin(offset * 0.001) * face.B.X + Math.Cos(offset * 0.001) * face.B.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.001) * face.C.Z + Math.Cos(offset * 0.001) * face.C.X, face.C.Y, -Math.Sin(offset * 0.001) * face.C.X + Math.Cos(offset * 0.001) * face.C.Z);
 			}
 			Gl.End();
 
