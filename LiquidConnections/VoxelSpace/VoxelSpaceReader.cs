@@ -28,16 +28,15 @@ namespace LiquidConnections.VoxelSpace
 				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(0, 0, 1)),
 				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(0, 1, 0)),
 				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(1, 0, 0)),
-
 				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(1, 1, 0)),
 				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(1, 0, 1)),
 				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(0, 1, 1)),
-
 				new DiscreteEdge(coordinates.Move(1, 0, 0), coordinates.Move(1, 1, 0)),
 				new DiscreteEdge(coordinates.Move(1, 0, 0), coordinates.Move(1, 0, 1)),
-
 				new DiscreteEdge(coordinates.Move(0, 1, 1), coordinates.Move(0, 1, 0)),
 				new DiscreteEdge(coordinates.Move(0, 1, 1), coordinates.Move(0, 0, 1)),
+				new DiscreteEdge(coordinates.Move(0, 1, 0), coordinates.Move(1, 1, 0)),
+				new DiscreteEdge(coordinates.Move(0, 0, 1), coordinates.Move(1, 0, 1)),
 			};
 
 			FilterEdges(voxelSpace, ref edges);
