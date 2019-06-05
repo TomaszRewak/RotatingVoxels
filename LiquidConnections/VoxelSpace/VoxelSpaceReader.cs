@@ -51,12 +51,17 @@ namespace LiquidConnections.VoxelSpace
 		{
 			for (int i = 0; i < edges.Length; i++)
 			{
-				if (voxelSpace.CrossesZeroAt(edges[i]))
+				if (CrossesZero(voxelSpace, edges[i]))
 					continue;
 
 				edges[i--] = edges[edges.Length - 1];
 				edges = edges.Slice(0, edges.Length - 1);
 			}
+		}
+
+		private static bool CrossesZero(float[,,] voxelSpace, in DiscreteEdge edge)
+		{
+			return voxelSpace.At(edge.Begin) * voxelSpace.At(edge.End) <= 0;
 		}
 
 		private static void GenerateFace(
@@ -66,7 +71,40 @@ namespace LiquidConnections.VoxelSpace
 			in DiscreteEdge edgeC, 
 			ICollection<Face> faces)
 		{
+			var crossingA = Crossing(voxelSpace, edgeA);
+			var crossingB = Crossing(voxelSpace, edgeB);
+			var crossingC = Crossing(voxelSpace, edgeC);
 
+			if (!ValidateFaceCandidate(crossingA.Vector, crossingB.Vector, crossingC.Vector))
+				return;
+
+			faces.Add(new Face {
+				A = crossingA.Origin,
+				B = crossingB.Origin,
+				C = crossingC.Origin,
+				Normal = crossingA.Vector + crossingB.Vector + crossingC.Vector
+			});
+		}
+
+		private static Ray Crossing(float[,,] voxelSpace, in DiscreteEdge edge)
+		{
+			var d1 = voxelSpace.At(edge.Begin);
+			var d2 = voxelSpace.At(edge.End);
+
+			var point = edge.Begin.AsVertex() + edge.AsVector() * d1 / (d1 + d2);
+
+			if (d1 < d2)
+				return new Ray(point, new Vector(edge.Begin.AsVertex(), point));
+			else
+				return new Ray(point, new Vector(edge.End.AsVertex(), point));
+		}
+
+		private static bool ValidateFaceCandidate(in Vector vectorA, in Vector vectorB, in Vector vectorC)
+		{
+			return
+				vectorA.DotProduct(vectorB) >= 0 &&
+				vectorA.DotProduct(vectorC) >= 0 &&
+				vectorB.DotProduct(vectorC) >= 0;
 		}
 	}
 }

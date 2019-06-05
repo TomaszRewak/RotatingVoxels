@@ -30,7 +30,7 @@ namespace LiquidConnections.VoxelSpace
 			};
 		}
 
-		public Vertex AsPoint()
+		public Vertex AsVertex()
 		{
 			return new Vertex(X, Y, Z);
 		}

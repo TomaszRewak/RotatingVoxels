@@ -40,9 +40,29 @@ namespace LiquidConnections.Geometry
 			);
 		}
 
+		public static Vector operator +(in Vector vectorA, in Vector vectorB)
+		{
+			return new Vector(vectorA.X + vectorB.X, vectorA.Y + vectorB.Y, vectorA.Z + vectorB.Z);
+		}
+
+		public static Vector operator *(in Vector vectorA, in Vector vectorB)
+		{
+			return new Vector(vectorA.X * vectorB.X, vectorA.Y * vectorB.Y, vectorA.Z * vectorB.Z);
+		}
+
+		public static Vector operator /(in Vector vectorA, in Vector vectorB)
+		{
+			return new Vector(vectorA.X / vectorB.X, vectorA.Y / vectorB.Y, vectorA.Z / vectorB.Z);
+		}
+
 		public static Vector operator *(in Vector vector, float By)
 		{
 			return new Vector(vector.X * By, vector.Y * By, vector.Z * By);
+		}
+
+		public static Vector operator /(in Vector vector, float By)
+		{
+			return new Vector(vector.X / By, vector.Y / By, vector.Z / By);
 		}
 	}
 }

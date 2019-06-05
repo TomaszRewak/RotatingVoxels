@@ -37,5 +37,30 @@ namespace LiquidConnections.Geometry
 			MaxY = Math.Max(Math.Max(face.A.Y, face.B.Y), face.C.Y);
 			MaxZ = Math.Max(Math.Max(face.A.Z, face.B.Z), face.C.Z);
 		}
+
+		public static Bounds Min => new Bounds
+		{
+			MinX = float.MaxValue,
+			MinY = float.MaxValue,
+			MinZ = float.MaxValue,
+
+			MaxX = float.MinValue,
+			MaxY = float.MinValue,
+			MaxZ = float.MinValue
+		};
+
+		public static Bounds operator +(in Bounds boundsA, in Bounds boundsB)
+		{
+			return new Bounds
+			{
+				MinX = Math.Min(boundsA.MinX, boundsB.MinX),
+				MinY = Math.Min(boundsA.MinY, boundsB.MinY),
+				MinZ = Math.Min(boundsA.MinZ, boundsB.MinZ),
+
+				MaxX = Math.Max(boundsA.MaxX, boundsB.MaxX),
+				MaxY = Math.Max(boundsA.MaxY, boundsB.MaxY),
+				MaxZ = Math.Max(boundsA.MaxZ, boundsB.MaxZ)
+			};
+		}
 	}
 }
