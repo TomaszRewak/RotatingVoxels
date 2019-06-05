@@ -221,6 +221,7 @@ namespace LiquidConnections
 			Gl.ShadeModel(ShadingModel.Smooth);
 			Gl.FrontFace(FrontFaceDirection.Ccw);
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+			//glShadeModel(GL_SMOOTH);
 		}
 	}
 }

@@ -40,6 +40,11 @@ namespace LiquidConnections.Geometry
 			);
 		}
 
+		public static Vector operator -(in Vector vectorA)
+		{
+			return new Vector(-vectorA.X, -vectorA.Y, -vectorA.Z);
+		}
+
 		public static Vector operator +(in Vector vectorA, in Vector vectorB)
 		{
 			return new Vector(vectorA.X + vectorB.X, vectorA.Y + vectorB.Y, vectorA.Z + vectorB.Z);

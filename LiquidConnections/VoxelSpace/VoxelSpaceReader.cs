@@ -78,11 +78,20 @@ namespace LiquidConnections.VoxelSpace
 			if (!ValidateFaceCandidate(crossingA.Vector, crossingB.Vector, crossingC.Vector))
 				return;
 
+			// TODO: Simplify normal vector calculation
+			var vectorA = new Vector(crossingA.Origin, crossingB.Origin);
+			var vectorB = new Vector(crossingA.Origin, crossingC.Origin);
+			var normalVector = vectorA.CrossProduct(vectorB);
+			var directionVector = crossingA.Vector + crossingB.Vector + crossingC.Vector;
+
+			if (normalVector.DotProduct(directionVector) < 0)
+				normalVector = -normalVector;
+
 			faces.Add(new Face {
 				A = crossingA.Origin,
 				B = crossingB.Origin,
 				C = crossingC.Origin,
-				Normal = crossingA.Vector + crossingB.Vector + crossingC.Vector
+				Normal = normalVector
 			});
 		}
 
