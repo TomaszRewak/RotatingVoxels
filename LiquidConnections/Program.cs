@@ -101,8 +101,8 @@ namespace LiquidConnections
 
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
-			var voxelSpaceBuilder = new VoxelSpaceBuilder(50, 50, 50);
-			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 50, 50, 50)));
+			var voxelSpaceBuilder = new VoxelSpaceBuilder(20, 20, 20);
+			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 20, 20, 20)));
 
 			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceBuilder.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
 
