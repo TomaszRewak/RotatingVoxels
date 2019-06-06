@@ -28,8 +28,8 @@ namespace LiquidConnections.Geometry
 
 			var epsilon = 0.0000001f;
 
-			var edge1 = new Vector(face.A, face.B);
-			var edge2 = new Vector(face.A, face.C);
+			var edge1 = new Vector(face.A.Point, face.B.Point);
+			var edge2 = new Vector(face.A.Point, face.C.Point);
 
 			var crossProduct = Vector.CrossProduct(edge2);
 			var dotProduct = edge1.DotProduct(crossProduct);
@@ -38,7 +38,7 @@ namespace LiquidConnections.Geometry
 				return false;
 
 			var invertedDotProduct = 1.0f / dotProduct;
-			var rayVector = new Vector(face.A, Origin);
+			var rayVector = new Vector(face.A.Point, Origin);
 			var u = invertedDotProduct * rayVector.DotProduct(crossProduct);
 
 			if (u < 0.0 || u > 1.0)

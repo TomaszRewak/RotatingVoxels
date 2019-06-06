@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -72,6 +73,7 @@ namespace LiquidConnections
 		}
 
 		static Face[] bunny;
+		static float[] bunnyFloat;
 
 		static void Main(string[] args)
 		{
@@ -105,6 +107,8 @@ namespace LiquidConnections
 			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(1, 1, 1, 19, 19, 19)));
 
 			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceBuilder.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
+
+			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
 
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{
@@ -196,10 +200,12 @@ namespace LiquidConnections
 			{
 				ref var face = ref bunny[i];
 
-				Gl.Normal3(Math.Sin(offset * 0.001) * face.Normal.Z + Math.Cos(offset * 0.001) * face.Normal.X, face.Normal.Y, -Math.Sin(offset * 0.001) * face.Normal.X + Math.Cos(offset * 0.001) * face.Normal.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.001) * face.A.Z + Math.Cos(offset * 0.001) * face.A.X, face.A.Y, -Math.Sin(offset * 0.001) * face.A.X + Math.Cos(offset * 0.001) * face.A.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.001) * face.B.Z + Math.Cos(offset * 0.001) * face.B.X, face.B.Y, -Math.Sin(offset * 0.001) * face.B.X + Math.Cos(offset * 0.001) * face.B.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.001) * face.C.Z + Math.Cos(offset * 0.001) * face.C.X, face.C.Y, -Math.Sin(offset * 0.001) * face.C.X + Math.Cos(offset * 0.001) * face.C.Z);
+				Gl.Normal3(Math.Sin(offset * 0.003) * face.A.Normal.Z + Math.Cos(offset * 0.003) * face.A.Normal.X, face.A.Normal.Y, -Math.Sin(offset * 0.003) * face.A.Normal.X + Math.Cos(offset * 0.003) * face.A.Normal.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.003) * face.A.Point.Z + Math.Cos(offset * 0.003) * face.A.Point.X, face.A.Point.Y, -Math.Sin(offset * 0.003) * face.A.Point.X + Math.Cos(offset * 0.003) * face.A.Point.Z);
+				Gl.Normal3(Math.Sin(offset * 0.003) * face.B.Normal.Z + Math.Cos(offset * 0.003) * face.B.Normal.X, face.B.Normal.Y, -Math.Sin(offset * 0.003) * face.B.Normal.X + Math.Cos(offset * 0.003) * face.B.Normal.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.003) * face.B.Point.Z + Math.Cos(offset * 0.003) * face.B.Point.X, face.B.Point.Y, -Math.Sin(offset * 0.003) * face.B.Point.X + Math.Cos(offset * 0.003) * face.B.Point.Z);
+				Gl.Normal3(Math.Sin(offset * 0.003) * face.C.Normal.Z + Math.Cos(offset * 0.003) * face.C.Normal.X, face.C.Normal.Y, -Math.Sin(offset * 0.003) * face.C.Normal.X + Math.Cos(offset * 0.003) * face.C.Normal.Z);
+				Gl.Vertex3(Math.Sin(offset * 0.003) * face.C.Point.Z + Math.Cos(offset * 0.003) * face.C.Point.X, face.C.Point.Y, -Math.Sin(offset * 0.003) * face.C.Point.X + Math.Cos(offset * 0.003) * face.C.Point.Z);
 			}
 			Gl.End();
 
@@ -221,7 +227,6 @@ namespace LiquidConnections
 			Gl.ShadeModel(ShadingModel.Smooth);
 			Gl.FrontFace(FrontFaceDirection.Ccw);
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-			//glShadeModel(GL_SMOOTH);
 		}
 	}
 }

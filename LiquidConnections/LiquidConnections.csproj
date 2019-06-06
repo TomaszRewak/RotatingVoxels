@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\Face.cs" />
+    <Compile Include="Geometry\FaceVertex.cs" />
     <Compile Include="Geometry\Ray.cs" />
     <Compile Include="Geometry\Vector.cs" />
     <Compile Include="Geometry\Vertex.cs" />

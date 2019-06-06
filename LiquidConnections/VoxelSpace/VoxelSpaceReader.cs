@@ -88,10 +88,9 @@ namespace LiquidConnections.VoxelSpace
 				normalVector = -normalVector;
 
 			faces.Add(new Face {
-				A = crossingA.Origin,
-				B = crossingB.Origin,
-				C = crossingC.Origin,
-				Normal = normalVector
+				A = new FaceVertex(crossingA.Origin, normalVector),
+				B = new FaceVertex(crossingB.Origin, normalVector),
+				C = new FaceVertex(crossingC.Origin, normalVector),
 			});
 		}
 
@@ -99,10 +98,7 @@ namespace LiquidConnections.VoxelSpace
 		{
 			var normalizedEdge = NormalizeEdge(voxelSpace, edge);
 
-			var d1 = voxelSpace.At(normalizedEdge.Begin);
-			var d2 = voxelSpace.At(normalizedEdge.End);
-
-			var point = normalizedEdge.Begin.AsVertex() - normalizedEdge.AsVector() * d1 / (d2 - d1);
+			var point = normalizedEdge.Begin.AsVertex() - normalizedEdge.AsVector() * voxelSpace.At(normalizedEdge.Begin);
 
 			return new Ray(point, new Vector(normalizedEdge.Begin.AsVertex(), point));
 		}

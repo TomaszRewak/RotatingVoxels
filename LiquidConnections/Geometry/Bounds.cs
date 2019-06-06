@@ -29,13 +29,13 @@ namespace LiquidConnections.Geometry
 
 		public Bounds(in Face face)
 		{
-			MinX = Math.Min(Math.Min(face.A.X, face.B.X), face.C.X);
-			MinY = Math.Min(Math.Min(face.A.Y, face.B.Y), face.C.Y);
-			MinZ = Math.Min(Math.Min(face.A.Z, face.B.Z), face.C.Z);
+			MinX = Math.Min(Math.Min(face.A.Point.X, face.B.Point.X), face.C.Point.X);
+			MinY = Math.Min(Math.Min(face.A.Point.Y, face.B.Point.Y), face.C.Point.Y);
+			MinZ = Math.Min(Math.Min(face.A.Point.Z, face.B.Point.Z), face.C.Point.Z);
 
-			MaxX = Math.Max(Math.Max(face.A.X, face.B.X), face.C.X);
-			MaxY = Math.Max(Math.Max(face.A.Y, face.B.Y), face.C.Y);
-			MaxZ = Math.Max(Math.Max(face.A.Z, face.B.Z), face.C.Z);
+			MaxX = Math.Max(Math.Max(face.A.Point.X, face.B.Point.X), face.C.Point.X);
+			MaxY = Math.Max(Math.Max(face.A.Point.Y, face.B.Point.Y), face.C.Point.Y);
+			MaxZ = Math.Max(Math.Max(face.A.Point.Z, face.B.Point.Z), face.C.Point.Z);
 		}
 
 		public static Bounds Min => new Bounds

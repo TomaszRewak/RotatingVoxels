@@ -27,13 +27,21 @@ namespace LiquidConnections.Shapes
 			for (int i = 0; i < faces.Length; i++)
 				normalizedFaces[i] = new Face
 				{
-					A = minPoint + new Vector(faces[i].A, maxShapePoint) * scaleVector,
-					B = minPoint + new Vector(faces[i].B, maxShapePoint) * scaleVector,
-					C = minPoint + new Vector(faces[i].C, maxShapePoint) * scaleVector,
-					Normal = faces[i].Normal / scaleVector
+					A = Normalize(faces[i].A, minPoint, maxShapePoint, scaleVector),
+					B = Normalize(faces[i].B, minPoint, maxShapePoint, scaleVector),
+					C = Normalize(faces[i].C, minPoint, maxShapePoint, scaleVector),
 				};
 
 			return normalizedFaces;
+		}
+
+		private static FaceVertex Normalize(in FaceVertex vertex, in Vertex minPoint, in Vertex maxShapePoint, in Vector scaleVector)
+		{
+			return new FaceVertex
+			{
+				Point = minPoint + new Vector(vertex.Point, maxShapePoint) * scaleVector,
+				Normal = vertex.Normal / scaleVector
+			};
 		}
 	}
 }

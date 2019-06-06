@@ -63,8 +63,8 @@ namespace LiquidConnections.VoxelSpace
 			int x1 = (int)intersection.X,
 				x2 = (int)intersection.X + 1;
 
-			Add(new DiscreteCoordinates(x1, y, z), GetDistance(intersection.X - x1, face.Normal.X), intersection);
-			Add(new DiscreteCoordinates(x2, y, z), GetDistance(intersection.X - x2, face.Normal.X), intersection);
+			Add(new DiscreteCoordinates(x1, y, z), GetDistance(intersection.X - x1, face.A.Normal.X), intersection);
+			Add(new DiscreteCoordinates(x2, y, z), GetDistance(intersection.X - x2, face.A.Normal.X), intersection);
 		}
 
 		private void AddY(int x, int z, in Face face, in Vertex intersection)
@@ -72,8 +72,8 @@ namespace LiquidConnections.VoxelSpace
 			int y1 = (int)intersection.Y,
 				y2 = (int)intersection.Y + 1;
 
-			Add(new DiscreteCoordinates(x, y1, z), GetDistance(intersection.Y - y1, face.Normal.Y), intersection);
-			Add(new DiscreteCoordinates(x, y2, z), GetDistance(intersection.Y - y2, face.Normal.Y), intersection);
+			Add(new DiscreteCoordinates(x, y1, z), GetDistance(intersection.Y - y1, face.A.Normal.Y), intersection);
+			Add(new DiscreteCoordinates(x, y2, z), GetDistance(intersection.Y - y2, face.A.Normal.Y), intersection);
 		}
 
 		private void AddZ(int x, int y, in Face face, in Vertex intersection)
@@ -81,8 +81,8 @@ namespace LiquidConnections.VoxelSpace
 			int z1 = (int)intersection.Z,
 				z2 = (int)intersection.Z + 1;
 
-			Add(new DiscreteCoordinates(x, y, z1), GetDistance(intersection.Z - z1, face.Normal.Z), intersection);
-			Add(new DiscreteCoordinates(x, y, z2), GetDistance(intersection.Z - z2, face.Normal.Z), intersection);
+			Add(new DiscreteCoordinates(x, y, z1), GetDistance(intersection.Z - z1, face.A.Normal.Z), intersection);
+			Add(new DiscreteCoordinates(x, y, z2), GetDistance(intersection.Z - z2, face.A.Normal.Z), intersection);
 		}
 
 		private void Add(in DiscreteCoordinates coordinates, float distance, in Vertex intersection)

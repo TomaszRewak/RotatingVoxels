@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 namespace LiquidConnections.Geometry
 {
-	struct Face
+	struct FaceVertex
 	{
-		public FaceVertex A;
-		public FaceVertex B;
-		public FaceVertex C;
+		public Vertex Point;
+		public Vector Normal;
 
-		public Face(FaceVertex a, FaceVertex b, FaceVertex c)
+		public FaceVertex(Vertex point, Vector normalVector)
 		{
-			A = a;
-			B = b;
-			C = c;
+			Point = point;
+			Normal = normalVector;
 		}
 	}
 }
