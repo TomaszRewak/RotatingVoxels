@@ -38,7 +38,7 @@ namespace LiquidConnections.VoxelSpace
 
 	static class DiscreteCoordinatesExtension
 	{
-		public static ref float At(this float[,,] voxelSpace, in DiscreteCoordinates coordinates)
+		public static ref VoxelCell At(this VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
 			return ref voxelSpace[coordinates.X, coordinates.Y, coordinates.Z];
 		}

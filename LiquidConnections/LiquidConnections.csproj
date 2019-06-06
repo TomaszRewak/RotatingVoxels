@@ -93,6 +93,7 @@
     <Compile Include="VoxelSpace\DiscreteBounds.cs" />
     <Compile Include="VoxelSpace\DiscreteCoordinates.cs" />
     <Compile Include="VoxelSpace\DiscreteEdge.cs" />
+    <Compile Include="VoxelSpace\VoxelCell.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceBuilder.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceReader.cs" />
   </ItemGroup>

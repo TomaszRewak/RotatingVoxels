@@ -26,6 +26,8 @@ namespace LiquidConnections.Geometry
 			Z = end.Z - begin.Z;
 		}
 
+		public float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+
 		public float DotProduct(in Vector second)
 		{
 			return X * second.X + Y * second.Y + Z * second.Z;

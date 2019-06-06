@@ -10,7 +10,7 @@ namespace LiquidConnections.VoxelSpace
 {
 	static class VoxelSpaceReader
 	{
-		public static Face[] GenerateShape(float[,,] voxelSpace)
+		public static Face[] GenerateShape(VoxelCell[,,] voxelSpace)
 		{
 			var faces = new List<Face>();
 			var bounds = new DiscreteBounds(voxelSpace).Offset(0, 0, 0, -1, -1, -1);
@@ -21,7 +21,7 @@ namespace LiquidConnections.VoxelSpace
 			return faces.ToArray();
 		}
 
-		private static void GenerateFaces(float[,,] voxelSpace, in DiscreteCoordinates coordinates, ICollection<Face> faces)
+		private static void GenerateFaces(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates, ICollection<Face> faces)
 		{
 			Span<DiscreteEdge> edges = stackalloc DiscreteEdge[]
 			{
@@ -47,7 +47,7 @@ namespace LiquidConnections.VoxelSpace
 						GenerateFace(voxelSpace, edges[i], edges[j], edges[k], faces);
 		}
 
-		private static void FilterEdges(float[,,] voxelSpace, ref Span<DiscreteEdge> edges)
+		private static void FilterEdges(VoxelCell[,,] voxelSpace, ref Span<DiscreteEdge> edges)
 		{
 			for (int i = 0; i < edges.Length; i++)
 			{
@@ -59,13 +59,13 @@ namespace LiquidConnections.VoxelSpace
 			}
 		}
 
-		private static bool CrossesZero(float[,,] voxelSpace, in DiscreteEdge edge)
+		private static bool CrossesZero(VoxelCell[,,] voxelSpace, in DiscreteEdge edge)
 		{
 			return voxelSpace.At(edge.Begin) * voxelSpace.At(edge.End) <= 0;
 		}
 
 		private static void GenerateFace(
-			float[,,] voxelSpace, 
+			VoxelCell[,,] voxelSpace, 
 			in DiscreteEdge edgeA,
 			in DiscreteEdge edgeB,
 			in DiscreteEdge edgeC, 

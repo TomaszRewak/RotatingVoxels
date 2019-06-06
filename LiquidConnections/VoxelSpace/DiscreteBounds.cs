@@ -18,7 +18,7 @@ namespace LiquidConnections.VoxelSpace
 		public int MaxY;
 		public int MaxZ;
 
-		public DiscreteBounds(float[,,] voxelSpace)
+		public DiscreteBounds(VoxelCell[,,] voxelSpace)
 		{
 			MinX = 0;
 			MinY = 0;
