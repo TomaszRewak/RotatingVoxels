@@ -24,7 +24,7 @@ namespace LiquidConnections.VoxelSpace
 		public void Clear()
 		{
 			foreach (var coordinates in Bounds)
-				VoxelSpace.At(coordinates) = new VoxelCell(float.MaxValue, new Vector());
+				VoxelSpace.At(coordinates) = new VoxelCell(Vertex.Max, new Vector());
 		}
 
 		public void Add(Face[] faces)
@@ -40,60 +40,31 @@ namespace LiquidConnections.VoxelSpace
 			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
 				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
 					if (new Ray(new Vertex(x, y, -1), new Vector(0, 0, 1)).Intersect(face, out var intersection))
-						AddZ(x, y, face, intersection, face.Normal(intersection));
+						Add(intersection, new DiscreteCoordinates(x, y, (int)intersection.Z), face.Normal(intersection));
 
 			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
 				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
 					if (new Ray(new Vertex(x, -1, z), new Vector(0, 1, 0)).Intersect(face, out var intersection))
-						AddY(x, z, face, intersection, face.Normal(intersection));
+						Add(intersection, new DiscreteCoordinates(x, (int)intersection.Y, z), face.Normal(intersection));
 
 			for (int y = bounds.MinY; y <= bounds.MaxY; y++)
 				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
 					if (new Ray(new Vertex(-1, y, z), new Vector(1, 0, 0)).Intersect(face, out var intersection))
-						AddX(y, z, face, intersection, face.Normal(intersection));
+						Add(intersection, new DiscreteCoordinates((int)intersection.X, y, z), face.Normal(intersection));
 		}
 
-		private float GetDistance(float d, float normal)
-		{
-			return normal < 0 ? d : -d;
-		}
-
-		private void AddX(int y, int z, in Face face, in Vertex intersection, in Vector normal)
-		{
-			int x1 = (int)intersection.X,
-				x2 = (int)intersection.X + 1;
-
-			Add(new DiscreteCoordinates(x1, y, z), GetDistance(intersection.X - x1, normal.X), normal);
-			Add(new DiscreteCoordinates(x2, y, z), GetDistance(intersection.X - x2, normal.X), normal);
-		}
-
-		private void AddY(int x, int z, in Face face, in Vertex intersection, in Vector normal)
-		{
-			int y1 = (int)intersection.Y,
-				y2 = (int)intersection.Y + 1;
-
-			Add(new DiscreteCoordinates(x, y1, z), GetDistance(intersection.Y - y1, normal.Y), normal);
-			Add(new DiscreteCoordinates(x, y2, z), GetDistance(intersection.Y - y2, normal.Y), normal);
-		}
-
-		private void AddZ(int x, int y, in Face face, in Vertex intersection, in Vector normal)
-		{
-			int z1 = (int)intersection.Z,
-				z2 = (int)intersection.Z + 1;
-
-			Add(new DiscreteCoordinates(x, y, z1), GetDistance(intersection.Z - z1, normal.Z), normal);
-			Add(new DiscreteCoordinates(x, y, z2), GetDistance(intersection.Z - z2, normal.Z), normal);
-		}
-
-		private void Add(in DiscreteCoordinates coordinates, float distance, in Vector normal)
+		private void Add(in Vertex intersection, in DiscreteCoordinates coordinates, in Vector normal)
 		{
 			if (!Bounds.Inside(coordinates))
 				return;
 
-			if (VoxelSpace.At(coordinates).Distance < distance)
+			var oldDistance = new Vector(coordinates.AsVertex(), VoxelSpace.At(coordinates).NearestIntersection).Length;
+			var newDistance = new Vector(coordinates.AsVertex(), intersection).Length;
+
+			if (newDistance < oldDistance)
 				return;
 
-			VoxelSpace.At(coordinates) = new VoxelCell(distance, normal);
+			VoxelSpace.At(coordinates) = new VoxelCell(intersection, normal);
 		}
 
 		//private void propagate(const DiscreteCoordinates& coordinates, const Shapes::Vertex& intersection)

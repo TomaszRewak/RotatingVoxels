@@ -19,6 +19,8 @@ namespace LiquidConnections.Geometry
 			Z = z;
 		}
 
+		public static Vertex Max => new Vertex(float.MaxValue, float.MaxValue, float.MaxValue);
+
 		public static Vertex operator +(in Vertex vertex, in Vector vector)
 		{
 			return new Vertex(vertex.X + vector.X, vertex.Y + vector.Y, vertex.Z + vector.Z);
