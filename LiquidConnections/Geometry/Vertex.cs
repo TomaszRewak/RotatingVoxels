@@ -30,5 +30,15 @@ namespace LiquidConnections.Geometry
 		{
 			return new Vertex(vertex.X - vector.X, vertex.Y - vector.Y, vertex.Z - vector.Z);
 		}
+
+		public static bool operator ==(in Vertex first, in Vertex second)
+		{
+			return first.X == second.X && first.Y == second.Y && first.Z == second.Z;
+		}
+
+		public static bool operator !=(in Vertex first, in Vertex second)
+		{
+			return !(first == second);
+		}
 	}
 }

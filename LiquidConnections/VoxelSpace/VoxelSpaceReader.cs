@@ -23,100 +23,63 @@ namespace LiquidConnections.VoxelSpace
 
 		private static void GenerateFaces(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates, ICollection<Face> faces)
 		{
-			Span<DiscreteEdge> edges = stackalloc DiscreteEdge[]
+			Span<DiscreteCoordinates> nearbyCoordinates = stackalloc DiscreteCoordinates[]
 			{
-				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(0, 0, 1)),
-				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(0, 1, 0)),
-				new DiscreteEdge(coordinates.Move(0, 0, 0), coordinates.Move(1, 0, 0)),
-				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(1, 1, 0)),
-				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(1, 0, 1)),
-				new DiscreteEdge(coordinates.Move(1, 1, 1), coordinates.Move(0, 1, 1)),
-				new DiscreteEdge(coordinates.Move(1, 0, 0), coordinates.Move(1, 1, 0)),
-				new DiscreteEdge(coordinates.Move(1, 0, 0), coordinates.Move(1, 0, 1)),
-				new DiscreteEdge(coordinates.Move(0, 1, 1), coordinates.Move(0, 1, 0)),
-				new DiscreteEdge(coordinates.Move(0, 1, 1), coordinates.Move(0, 0, 1)),
-				new DiscreteEdge(coordinates.Move(0, 1, 0), coordinates.Move(1, 1, 0)),
-				new DiscreteEdge(coordinates.Move(0, 0, 1), coordinates.Move(1, 0, 1)),
+				coordinates.Move(0, 0, 0),
+				coordinates.Move(0, 0, 1),
+				coordinates.Move(0, 1, 0),
+				coordinates.Move(0, 1, 1),
+				coordinates.Move(1, 0, 0),
+				coordinates.Move(1, 0, 1),
+				coordinates.Move(1, 1, 0),
+				coordinates.Move(1, 1, 1),
 			};
 
-			FilterEdges(voxelSpace, ref edges);
+			Span<FaceVertex> vertices = stackalloc FaceVertex[8];
+			int verticesCount = 0;
 
-			for (int i = 0; i < edges.Length; i++)
-				for (int j = i + 1; j < edges.Length; j++)
-					for (int k = j + 1; k < edges.Length; k++)
-						GenerateFace(voxelSpace, edges[i], edges[j], edges[k], faces);
+			foreach (var vertexCoordinates in nearbyCoordinates)
+				if (HasNearbyVertex(voxelSpace, vertexCoordinates))
+					vertices[verticesCount++] = GetNearbyVertex(voxelSpace, vertexCoordinates);
+
+			for (int i = 0; i < verticesCount; i++)
+				for (int j = i + 1; j < verticesCount; j++)
+					for (int k = j + 1; k < verticesCount; k++)
+						GenerateFace(vertices[i], vertices[j], vertices[k], faces);
 		}
 
-		private static void FilterEdges(VoxelCell[,,] voxelSpace, ref Span<DiscreteEdge> edges)
+		private static bool HasNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
-			for (int i = 0; i < edges.Length; i++)
-			{
-				if (CrossesZero(voxelSpace, edges[i]))
-					continue;
-
-				edges[i--] = edges[edges.Length - 1];
-				edges = edges.Slice(0, edges.Length - 1);
-			}
+			return new Vector(coordinates.AsVertex(), voxelSpace.At(coordinates).NearestIntersection).Length < 1;
 		}
 
-		private static bool CrossesZero(VoxelCell[,,] voxelSpace, in DiscreteEdge edge)
+		private static FaceVertex GetNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
-			return voxelSpace.At(edge.Begin) * voxelSpace.At(edge.End) <= 0;
+			ref var cell = ref voxelSpace.At(coordinates);
+
+			return new FaceVertex(cell.NearestIntersection, cell.Normal * 100);
 		}
 
 		private static void GenerateFace(
-			VoxelCell[,,] voxelSpace, 
-			in DiscreteEdge edgeA,
-			in DiscreteEdge edgeB,
-			in DiscreteEdge edgeC, 
+			in FaceVertex vertexA,
+			in FaceVertex vertexB,
+			in FaceVertex vertexC, 
 			ICollection<Face> faces)
 		{
-			var crossingA = Crossing(voxelSpace, edgeA);
-			var crossingB = Crossing(voxelSpace, edgeB);
-			var crossingC = Crossing(voxelSpace, edgeC);
-
-			if (!ValidateFaceCandidate(crossingA.Vector, crossingB.Vector, crossingC.Vector))
+			if (!ValidateFaceCandidate(vertexA, vertexB, vertexC))
 				return;
 
-			// TODO: Simplify normal vector calculation
-			var vectorA = new Vector(crossingA.Origin, crossingB.Origin);
-			var vectorB = new Vector(crossingA.Origin, crossingC.Origin);
-			var normalVector = vectorA.CrossProduct(vectorB);
-			var directionVector = crossingA.Vector + crossingB.Vector + crossingC.Vector;
-
-			if (normalVector.DotProduct(directionVector) < 0)
-				normalVector = -normalVector;
-
-			faces.Add(new Face {
-				A = new FaceVertex(crossingA.Origin, normalVector),
-				B = new FaceVertex(crossingB.Origin, normalVector),
-				C = new FaceVertex(crossingC.Origin, normalVector),
-			});
+			faces.Add(new Face(vertexA, vertexB, vertexC));
 		}
 
-		private static Ray Crossing(float[,,] voxelSpace, in DiscreteEdge edge)
-		{
-			var normalizedEdge = NormalizeEdge(voxelSpace, edge);
-
-			var point = normalizedEdge.Begin.AsVertex() - normalizedEdge.AsVector() * voxelSpace.At(normalizedEdge.Begin);
-
-			return new Ray(point, new Vector(normalizedEdge.Begin.AsVertex(), point));
-		}
-
-		private static DiscreteEdge NormalizeEdge(float[,,] voxelSpace, in DiscreteEdge edge)
-		{
-			if (voxelSpace.At(edge.Begin) > voxelSpace.At(edge.End))
-				return new DiscreteEdge(edge.End, edge.Begin);
-			else
-				return edge;
-		}
-
-		private static bool ValidateFaceCandidate(in Vector vectorA, in Vector vectorB, in Vector vectorC)
+		private static bool ValidateFaceCandidate(in FaceVertex vertexA, in FaceVertex vertexB, in FaceVertex vertexC)
 		{
 			return
-				vectorA.DotProduct(vectorB) >= 0 &&
-				vectorA.DotProduct(vectorC) >= 0 &&
-				vectorB.DotProduct(vectorC) >= 0;
+				vertexA.Point != vertexB.Point &&
+				vertexB.Point != vertexC.Point &&
+				vertexA.Normal.DotProduct(vertexB.Normal) >= 0 &&
+				vertexA.Normal.DotProduct(vertexC.Normal) >= 0 &&
+				vertexB.Normal.DotProduct(vertexC.Normal) >= 0;
 		}
 	}
 }

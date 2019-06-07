@@ -61,7 +61,7 @@ namespace LiquidConnections.VoxelSpace
 			var oldDistance = new Vector(coordinates.AsVertex(), VoxelSpace.At(coordinates).NearestIntersection).Length;
 			var newDistance = new Vector(coordinates.AsVertex(), intersection).Length;
 
-			if (newDistance < oldDistance)
+			if (newDistance >= oldDistance)
 				return;
 
 			VoxelSpace.At(coordinates) = new VoxelCell(intersection, normal);
