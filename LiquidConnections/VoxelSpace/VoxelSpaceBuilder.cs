@@ -64,7 +64,9 @@ namespace LiquidConnections.VoxelSpace
 			if (newDistance >= oldDistance)
 				return;
 
-			VoxelSpace.At(coordinates) = new VoxelCell(intersection, normal);
+			ref var cell = ref VoxelSpace.At(coordinates);
+
+			cell = new VoxelCell(intersection, (normal + cell.Normal * cell.Weight) / (cell.Weight + 1), cell.Weight + 1);
 		}
 
 		//private void propagate(const DiscreteCoordinates& coordinates, const Shapes::Vertex& intersection)

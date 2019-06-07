@@ -50,7 +50,7 @@ namespace LiquidConnections.VoxelSpace
 
 		private static bool HasNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
-			return new Vector(coordinates.AsVertex(), voxelSpace.At(coordinates).NearestIntersection).Length < 1;
+			return new Vector(coordinates.AsVertex(), voxelSpace.At(coordinates).NearestIntersection).Length <= 1;
 		}
 
 		private static FaceVertex GetNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
