@@ -74,13 +74,19 @@ namespace LiquidConnections.VoxelSpace
 
 		private static bool ValidateFaceCandidate(in FaceVertex vertexA, in FaceVertex vertexB, in FaceVertex vertexC)
 		{
+			var vectorAB = new Vector(vertexA.Point, vertexB.Point);
+			var vectorAC = new Vector(vertexA.Point, vertexC.Point);
+
+			var faceNormal = vectorAB.CrossProduct(vectorAC);
+			var sameDirectionNormals =
+				(faceNormal.DotProduct(vertexA.Normal) >= 0 ? 1 : 0) +
+				(faceNormal.DotProduct(vertexB.Normal) >= 0 ? 1 : 0) +
+				(faceNormal.DotProduct(vertexC.Normal) >= 0 ? 1 : 0);
+
 			return
 				vertexA.Point != vertexB.Point &&
-				vertexB.Point != vertexC.Point;
-				//&&
-				//vertexA.Normal.DotProduct(vertexB.Normal) >= 0 &&
-				//vertexA.Normal.DotProduct(vertexC.Normal) >= 0 &&
-				//vertexB.Normal.DotProduct(vertexC.Normal) >= 0;
+				vertexB.Point != vertexC.Point &&
+				sameDirectionNormals % 3 == 0;
 		}
 	}
 }

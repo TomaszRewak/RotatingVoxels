@@ -225,7 +225,6 @@ namespace LiquidConnections
 			Gl.Enable(EnableCap.DepthTest);
 			Gl.DepthFunc(DepthFunction.Lequal);
 			Gl.ShadeModel(ShadingModel.Smooth);
-			Gl.FrontFace(FrontFaceDirection.Ccw);
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 		}
 	}
