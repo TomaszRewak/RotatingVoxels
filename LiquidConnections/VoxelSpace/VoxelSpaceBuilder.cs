@@ -31,6 +31,8 @@ namespace LiquidConnections.VoxelSpace
 		{
 			for (int i = 0; i < faces.Length; i++)
 				Add(faces[i]);
+
+			Propagate();
 		}
 
 		private void Add(in Face face)
@@ -67,6 +69,55 @@ namespace LiquidConnections.VoxelSpace
 			ref var cell = ref VoxelSpace.At(coordinates);
 
 			cell = new VoxelCell(intersection, (normal + cell.Normal * cell.Weight) / (cell.Weight + 1), cell.Weight + 1);
+		}
+
+		private void Propagate()
+		{
+			var bounds = Bounds;
+
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
+					for (int z = bounds.MinZ; z < bounds.MaxZ; z++)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x, y, z + 1));
+
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
+					for (int z = bounds.MaxZ; z > bounds.MinZ; z--)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x, y, z - 1));
+
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
+					for (int y = bounds.MinY; y < bounds.MaxY; y++)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x, y + 1, z));
+
+			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
+				for (int z = bounds.MinZ; z <= bounds.MaxZ; z++)
+					for (int y = bounds.MaxY; y > bounds.MinY; y--)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x, y - 1, z));
+
+			for (int y = bounds.MinY; y <= bounds.MaxY; y++)
+				for (int z = bounds.MinZ; z < bounds.MaxZ; z++)
+					for (int x = bounds.MinX; x < bounds.MaxX; x++)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x + 1, y, z));
+
+			for (int y = bounds.MinY; y <= bounds.MaxY; y++)
+				for (int z = bounds.MinZ; z < bounds.MaxZ; z++)
+					for (int x = bounds.MaxX; x > bounds.MinX; x--)
+						Propagate(new DiscreteCoordinates(x, y, z), new DiscreteCoordinates(x - 1, y, z));
+		}
+
+		private void Propagate(in DiscreteCoordinates from, in DiscreteCoordinates to)
+		{
+			ref var sourceCell = ref VoxelSpace.At(from);
+			ref var destinationCell = ref VoxelSpace.At(to);
+
+			var oldDistance = new Vector(to.AsVertex(), destinationCell.NearestIntersection).Length;
+			var newDistance = new Vector(to.AsVertex(), sourceCell.NearestIntersection).Length;
+
+			if (newDistance >= oldDistance)
+				return;
+
+			destinationCell = sourceCell;
 		}
 
 		//private void propagate(const DiscreteCoordinates& coordinates, const Shapes::Vertex& intersection)

@@ -76,10 +76,11 @@ namespace LiquidConnections.VoxelSpace
 		{
 			return
 				vertexA.Point != vertexB.Point &&
-				vertexB.Point != vertexC.Point &&
-				vertexA.Normal.DotProduct(vertexB.Normal) >= 0 &&
-				vertexA.Normal.DotProduct(vertexC.Normal) >= 0 &&
-				vertexB.Normal.DotProduct(vertexC.Normal) >= 0;
+				vertexB.Point != vertexC.Point;
+				//&&
+				//vertexA.Normal.DotProduct(vertexB.Normal) >= 0 &&
+				//vertexA.Normal.DotProduct(vertexC.Normal) >= 0 &&
+				//vertexB.Normal.DotProduct(vertexC.Normal) >= 0;
 		}
 	}
 }
