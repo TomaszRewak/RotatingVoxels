@@ -42,6 +42,13 @@ namespace LiquidConnections.Geometry
 			);
 		}
 
+		public Vector Normalize()
+		{
+			var length = Length;
+
+			return new Vector(X / Length, Y / Length, Z / Length);
+		}
+
 		public static Vector operator -(in Vector vectorA)
 		{
 			return new Vector(-vectorA.X, -vectorA.Y, -vectorA.Z);

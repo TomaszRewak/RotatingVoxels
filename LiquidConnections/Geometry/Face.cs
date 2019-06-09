@@ -29,7 +29,7 @@ namespace LiquidConnections.Geometry
 			var b = areaACP / areaABC;
 			var a = 1 - b - c;
 
-			return A.Normal * a + B.Normal * b + C.Normal * c;
+			return (A.Normal * a + B.Normal * b + C.Normal * c).Normalize();
 		}
 
 		private float Area(in Vertex a, in Vertex b, in Vertex c)

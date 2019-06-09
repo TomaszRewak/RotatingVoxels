@@ -196,9 +196,11 @@ namespace LiquidConnections
 
 			Gl.Translate(0.0f, 0.0f, -7.0f);
 			Gl.Begin(PrimitiveType.Triangles);
-			for (int i = 0; i < bunny.Length; i++)
+
+			var bunnySpan = bunny.AsSpan();
+			for (int i = 0; i < bunnySpan.Length; i++)
 			{
-				ref var face = ref bunny[i];
+				ref var face = ref bunnySpan[i];
 
 				Gl.Normal3(Math.Sin(offset * 0.003) * face.A.Normal.Z + Math.Cos(offset * 0.003) * face.A.Normal.X, face.A.Normal.Y, -Math.Sin(offset * 0.003) * face.A.Normal.X + Math.Cos(offset * 0.003) * face.A.Normal.Z);
 				Gl.Vertex3(Math.Sin(offset * 0.003) * face.A.Point.Z + Math.Cos(offset * 0.003) * face.A.Point.X, face.A.Point.Y, -Math.Sin(offset * 0.003) * face.A.Point.X + Math.Cos(offset * 0.003) * face.A.Point.Z);

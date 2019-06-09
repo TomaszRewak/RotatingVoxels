@@ -40,7 +40,7 @@ namespace LiquidConnections.Shapes
 			return new FaceVertex
 			{
 				Point = minPoint + new Vector(vertex.Point, maxShapePoint) * scaleVector,
-				Normal = vertex.Normal / scaleVector
+				Normal = (vertex.Normal / scaleVector).Normalize()
 			};
 		}
 	}

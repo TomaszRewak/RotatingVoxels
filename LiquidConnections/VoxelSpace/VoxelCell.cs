@@ -11,13 +11,11 @@ namespace LiquidConnections.VoxelSpace
 	{
 		public Vertex NearestIntersection;
 		public Vector Normal;
-		public int Weight;
 
-		public VoxelCell(Vertex nearestIntersection, Vector normal, int weight = 0)
+		public VoxelCell(Vertex nearestIntersection, Vector normal)
 		{
 			NearestIntersection = nearestIntersection;
 			Normal = normal;
-			Weight = weight;
 		}
 	}
 }

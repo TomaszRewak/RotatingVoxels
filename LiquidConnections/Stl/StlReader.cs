@@ -30,7 +30,7 @@ namespace LiquidConnections.Stl
 			{
 				var bytes = reader.ReadBytes(50);
 				var values = MemoryMarshal.Cast<byte, float>(bytes);
-				var normal = new Vector(values[0], values[1], values[2]);
+				var normal = new Vector(values[0], values[1], values[2]).Normalize();
 
 				faces[i] = new Face
 				{

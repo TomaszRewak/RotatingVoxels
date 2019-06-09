@@ -68,7 +68,7 @@ namespace LiquidConnections.VoxelSpace
 
 			ref var cell = ref VoxelSpace.At(coordinates);
 
-			cell = new VoxelCell(intersection, (normal + cell.Normal * cell.Weight) / (cell.Weight + 1), cell.Weight + 1);
+			cell = new VoxelCell(intersection, normal);
 		}
 
 		private void Propagate()
@@ -119,42 +119,5 @@ namespace LiquidConnections.VoxelSpace
 
 			destinationCell = sourceCell;
 		}
-
-		//private void propagate(const DiscreteCoordinates& coordinates, const Shapes::Vertex& intersection)
-		//{
-		//	std::stack<DiscreteCoordinates> points;
-		//	points.push(coordinates.move(1, 0, 0));
-		//	points.push(coordinates.move(-1, 0, 0));
-		//	points.push(coordinates.move(0, 1, 0));
-		//	points.push(coordinates.move(0, -1, 0));
-		//	points.push(coordinates.move(0, 0, 1));
-		//	points.push(coordinates.move(0, 0, -1));
-
-		//	while (!points.empty())
-		//	{
-		//		DiscreteCoordinates point = points.top();
-		//		points.pop();
-
-		//		if (!voxelSpace.inside(point))
-		//			continue;
-
-		//		float distance = std::sqrt(
-		//			std::pow(intersection.x - point.x, 2) +
-		//			std::pow(intersection.y - point.y, 2) +
-		//			std::pow(intersection.z - point.z, 2));
-
-		//		if (distance >= voxelSpace[point])
-		//			continue;
-
-		//		voxelSpace[point] = distance;
-
-		//		points.push(point.move(1, 0, 0));
-		//		points.push(point.move(-1, 0, 0));
-		//		points.push(point.move(0, 1, 0));
-		//		points.push(point.move(0, -1, 0));
-		//		points.push(point.move(0, 0, 1));
-		//		points.push(point.move(0, 0, -1));
-		//	}
-		//}
 	}
 }

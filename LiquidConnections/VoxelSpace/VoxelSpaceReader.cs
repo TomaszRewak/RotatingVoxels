@@ -57,7 +57,7 @@ namespace LiquidConnections.VoxelSpace
 		{
 			ref var cell = ref voxelSpace.At(coordinates);
 
-			return new FaceVertex(cell.NearestIntersection, cell.Normal * 100);
+			return new FaceVertex(cell.NearestIntersection, cell.Normal);
 		}
 
 		private static void GenerateFace(
