@@ -10,21 +10,40 @@ namespace LiquidConnections.VoxelSpace
 {
 	class VoxelSpaceBuilder
 	{
-		public VoxelCell[,,] VoxelSpace { get; }
-
-		public DiscreteBounds Bounds => new DiscreteBounds(VoxelSpace);
+		private readonly FullVoxelCell[,,] _voxelSpace;
 
 		public VoxelSpaceBuilder(int x, int y, int z)
 		{
-			VoxelSpace = new VoxelCell[x, y, z];
-
+			_voxelSpace = new FullVoxelCell[x, y, z];
+			
 			Clear();
 		}
 
 		public void Clear()
 		{
-			foreach (var coordinates in Bounds)
-				VoxelSpace.At(coordinates) = new VoxelCell(Vertex.Max, new Vector());
+			foreach (var coordinates in DiscreteBounds.Of(_voxelSpace))
+				_voxelSpace.At(coordinates) = new FullVoxelCell(Vertex.Max, new Vector());
+		}
+
+		public VoxelCell[,,] Build()
+		{
+			var voxels = new VoxelCell[_voxelSpace.GetLength(0), _voxelSpace.GetLength(1), _voxelSpace.GetLength(2)];
+
+			foreach (var coordinates in DiscreteBounds.Of(_voxelSpace))
+				voxels.At(coordinates) = Build(coordinates);
+
+			return voxels;
+		}
+
+		private VoxelCell Build(in DiscreteCoordinates coordinates)
+		{
+			ref var source = ref _voxelSpace.At(coordinates);
+
+			return new VoxelCell
+			{
+				Distance = new Vector(coordinates.AsVertex(), source.NearestIntersection).Length,
+				Normal = source.Normal
+			};
 		}
 
 		public void Add(Face[] faces)
@@ -37,7 +56,9 @@ namespace LiquidConnections.VoxelSpace
 
 		private void Add(in Face face)
 		{
-			var bounds = Bounds.Clip(new DiscreteBounds(new Bounds(face)));
+			var bounds = DiscreteBounds
+				.Of(_voxelSpace)
+				.Clip(new DiscreteBounds(new Bounds(face)));
 
 			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
 				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
@@ -57,23 +78,23 @@ namespace LiquidConnections.VoxelSpace
 
 		private void Add(in Vertex intersection, in DiscreteCoordinates coordinates, in Vector normal)
 		{
-			if (!Bounds.Inside(coordinates))
+			if (!DiscreteBounds.Of(_voxelSpace).Inside(coordinates))
 				return;
 
-			var oldDistance = new Vector(coordinates.AsVertex(), VoxelSpace.At(coordinates).NearestIntersection).Length;
+			var oldDistance = new Vector(coordinates.AsVertex(), _voxelSpace.At(coordinates).NearestIntersection).Length;
 			var newDistance = new Vector(coordinates.AsVertex(), intersection).Length;
 
 			if (newDistance >= oldDistance)
 				return;
 
-			ref var cell = ref VoxelSpace.At(coordinates);
+			ref var cell = ref _voxelSpace.At(coordinates);
 
-			cell = new VoxelCell(intersection, normal);
+			cell = new FullVoxelCell(intersection, normal);
 		}
 
 		private void Propagate()
 		{
-			var bounds = Bounds;
+			var bounds = DiscreteBounds.Of(_voxelSpace);
 
 			for (int x = bounds.MinX; x <= bounds.MaxX; x++)
 				for (int y = bounds.MinY; y <= bounds.MaxY; y++)
@@ -108,8 +129,8 @@ namespace LiquidConnections.VoxelSpace
 
 		private void Propagate(in DiscreteCoordinates from, in DiscreteCoordinates to)
 		{
-			ref var sourceCell = ref VoxelSpace.At(from);
-			ref var destinationCell = ref VoxelSpace.At(to);
+			ref var sourceCell = ref _voxelSpace.At(from);
+			ref var destinationCell = ref _voxelSpace.At(to);
 
 			var oldDistance = new Vector(to.AsVertex(), destinationCell.NearestIntersection).Length;
 			var newDistance = new Vector(to.AsVertex(), sourceCell.NearestIntersection).Length;

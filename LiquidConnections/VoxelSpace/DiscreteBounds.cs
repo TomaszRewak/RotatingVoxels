@@ -18,17 +18,6 @@ namespace LiquidConnections.VoxelSpace
 		public int MaxY;
 		public int MaxZ;
 
-		public DiscreteBounds(VoxelCell[,,] voxelSpace)
-		{
-			MinX = 0;
-			MinY = 0;
-			MinZ = 0;
-
-			MaxX = voxelSpace.GetLength(0) - 1;
-			MaxY = voxelSpace.GetLength(1) - 1;
-			MaxZ = voxelSpace.GetLength(2) - 1;
-		}
-
 		public DiscreteBounds(in Bounds bounds)
 		{
 			MinX = (int)Math.Ceiling(bounds.MinX);
@@ -38,6 +27,31 @@ namespace LiquidConnections.VoxelSpace
 			MaxX = (int)Math.Floor(bounds.MaxX);
 			MaxY = (int)Math.Floor(bounds.MaxY);
 			MaxZ = (int)Math.Floor(bounds.MaxZ);
+		}
+
+		public DiscreteBounds(in DiscreteCoordinates coordinates)
+		{
+			MinX = coordinates.X;
+			MinY = coordinates.Y;
+			MinZ = coordinates.Z;
+
+			MaxX = coordinates.X;
+			MaxY = coordinates.Y;
+			MaxZ = coordinates.Z;
+		}
+
+		public static DiscreteBounds Of<T>(T[,,] voxelSpace)
+		{
+			return new DiscreteBounds
+			{
+				MinX = 0,
+				MinY = 0,
+				MinZ = 0,
+
+				MaxX = voxelSpace.GetLength(0) - 1,
+				MaxY = voxelSpace.GetLength(1) - 1,
+				MaxZ = voxelSpace.GetLength(2) - 1
+			};
 		}
 
 		public DiscreteBounds Clip(in DiscreteBounds bounds)

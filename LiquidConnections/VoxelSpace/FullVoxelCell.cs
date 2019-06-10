@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace LiquidConnections.VoxelSpace
 {
-	struct VoxelCell
+	struct FullVoxelCell
 	{
-		public float Distance;
+		public Vertex NearestIntersection;
 		public Vector Normal;
 
-		public VoxelCell(float distance, Vector normal)
+		public FullVoxelCell(Vertex nearestIntersection, Vector normal)
 		{
-			Distance = distance;
+			NearestIntersection = nearestIntersection;
 			Normal = normal;
 		}
 	}

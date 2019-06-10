@@ -77,8 +77,6 @@ namespace LiquidConnections
 
 		static void Main(string[] args)
 		{
-			//Stopwatch stopwatch;
-
 			//var l = 50000;
 
 			//stopwatch = Stopwatch.StartNew();
@@ -103,12 +101,23 @@ namespace LiquidConnections
 
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
-			var voxelSpaceBuilder = new VoxelSpaceBuilder(40, 40, 40);
-			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(1, 1, 1, 39, 39, 39)));
+			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceBuilder.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
+			var voxelSpaceBuilder = new VoxelSpaceBuilder(40, 40, 40);
+			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(10, 10, 10, 30, 30, 30)));
+
+			var voxelizedBunny = voxelSpaceBuilder.Build();
+
+			var voxelSpaceConbiner = new VoxelSpaceCombiner(80, 40, 40);
+			voxelSpaceConbiner.Add(voxelizedBunny, new Vector(0, 0, 0));
+			voxelSpaceConbiner.Add(voxelizedBunny, new Vector(20, 0, 0));
+
+			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceConbiner.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
 
 			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
+			
+			stopwatch.Stop();
+			Console.WriteLine($"Pricessing took: {stopwatch.ElapsedMilliseconds}ms");
 
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{

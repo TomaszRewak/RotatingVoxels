@@ -13,7 +13,7 @@ namespace LiquidConnections.VoxelSpace
 		public static Face[] GenerateShape(VoxelCell[,,] voxelSpace)
 		{
 			var faces = new List<Face>();
-			var bounds = new DiscreteBounds(voxelSpace).Offset(0, 0, 0, -1, -1, -1);
+			var bounds = DiscreteBounds.Of(voxelSpace).Offset(0, 0, 0, -1, -1, -1);
 
 			foreach (var coordinates in bounds)
 				GenerateFaces(voxelSpace, coordinates, faces);
@@ -50,14 +50,14 @@ namespace LiquidConnections.VoxelSpace
 
 		private static bool HasNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
-			return new Vector(coordinates.AsVertex(), voxelSpace.At(coordinates).NearestIntersection).Length <= 1;
+			return voxelSpace.At(coordinates).Distance <= 1;
 		}
 
 		private static FaceVertex GetNearbyVertex(VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
 			ref var cell = ref voxelSpace.At(coordinates);
 
-			return new FaceVertex(cell.NearestIntersection, cell.Normal);
+			return new FaceVertex(coordinates.AsVertex() - cell.Normal * cell.Distance, cell.Normal);
 		}
 
 		private static void GenerateFace(
@@ -86,7 +86,7 @@ namespace LiquidConnections.VoxelSpace
 			return
 				vertexA.Point != vertexB.Point &&
 				vertexB.Point != vertexC.Point &&
-				sameDirectionNormals % 3 == 0;
+				sameDirectionNormals == 3;
 		}
 	}
 }
