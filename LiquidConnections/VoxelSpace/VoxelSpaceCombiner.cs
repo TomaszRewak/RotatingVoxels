@@ -9,7 +9,7 @@ namespace LiquidConnections.VoxelSpace
 {
 	class VoxelSpaceCombiner
 	{
-		const float _distance = 5;
+		const float _distance = 10;
 
 		public VoxelCell[,,] VoxelSpace { get; }
 
@@ -40,8 +40,9 @@ namespace LiquidConnections.VoxelSpace
 			if (probe.Distance > _distance)
 				return;
 
-			target = new VoxelCell {
-				Normal = probe.Normal,
+			target = new VoxelCell
+			{
+				Normal = (target.Normal + probe.Normal).Normalize(),
 				Distance = Math.Max(0, target.Distance - (_distance - probe.Distance))
 			};
 		}
@@ -62,7 +63,7 @@ namespace LiquidConnections.VoxelSpace
 			{
 				return shape.At(coordinates);
 
-				var weight = Math.Abs( 1 - Math.Abs((point.X - coordinates.X) * (point.Y - coordinates.Y) * (point.Z - coordinates.Z)));
+				var weight = Math.Abs(1 - Math.Abs((point.X - coordinates.X) * (point.Y - coordinates.Y) * (point.Z - coordinates.Z)));
 
 				normal += shape.At(coordinates).Normal * weight;
 				distance += shape.At(coordinates).Distance * weight;
@@ -73,7 +74,7 @@ namespace LiquidConnections.VoxelSpace
 			return new VoxelCell
 			{
 				Distance = _distance,
-				Normal = new Vector()
+				Normal = new Vector(1, 0, 0)
 			};
 		}
 	}

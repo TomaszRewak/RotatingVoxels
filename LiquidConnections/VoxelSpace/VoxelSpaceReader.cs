@@ -86,7 +86,7 @@ namespace LiquidConnections.VoxelSpace
 			return
 				vertexA.Point != vertexB.Point &&
 				vertexB.Point != vertexC.Point &&
-				sameDirectionNormals == 3;
+				sameDirectionNormals % 3 == 0;
 		}
 	}
 }
