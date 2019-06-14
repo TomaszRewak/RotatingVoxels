@@ -184,44 +184,45 @@ namespace LiquidConnections
 			return matrix;
 		}
 
+		static uint colorDataBuffer;
+		static float[] colorDataValues = {
+			1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+		};
+
 		static uint vertexDataBuffer;
 		static float[] vertexDataValues = {
-			-1.0f,-1.0f,-1.0f,
-			-1.0f,-1.0f, 1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f,-1.0f,
-			-1.0f,-1.0f,-1.0f,
-			-1.0f, 1.0f,-1.0f,
-			1.0f,-1.0f, 1.0f,
-			-1.0f,-1.0f,-1.0f,
-			1.0f,-1.0f,-1.0f,
-			1.0f, 1.0f,-1.0f,
-			1.0f,-1.0f,-1.0f,
-			-1.0f,-1.0f,-1.0f,
-			-1.0f,-1.0f,-1.0f,
-			-1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f,-1.0f,
-			1.0f,-1.0f, 1.0f,
-			-1.0f,-1.0f, 1.0f,
-			-1.0f,-1.0f,-1.0f,
-			-1.0f, 1.0f, 1.0f,
-			-1.0f,-1.0f, 1.0f,
-			1.0f,-1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f,-1.0f,-1.0f,
-			1.0f, 1.0f,-1.0f,
-			1.0f,-1.0f,-1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f,-1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f,-1.0f,
-			-1.0f, 1.0f,-1.0f,
-			1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f,-1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f,-1.0f, 1.0f
+			-1.0f, -1.0f, +1.0f,
+			+1.0f, -1.0f, +1.0f,
+			+1.0f, +1.0f, +1.0f,
+			-1.0f, +1.0f, +1.0f,
+			-1.0f, -1.0f, -1.0f,
+			+1.0f, -1.0f, -1.0f,
+			+1.0f, +1.0f, -1.0f,
+			-1.0f, +1.0f, -1.0f
+		};
+
+		static uint indexDataBuffer;
+		static ushort[] indexDataValues = {
+			// front
+			0, 1, 2,
+			2, 3, 0,
+			1, 5, 6,
+			6, 2, 1,
+			7, 6, 5,
+			5, 4, 7,
+			4, 0, 3,
+			3, 7, 4,
+			4, 5, 1,
+			1, 0, 4,
+			3, 2, 6,
+			6, 7, 3
 		};
 
 		static int offset = 0;
@@ -254,11 +255,22 @@ namespace LiquidConnections
 				Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
 				Gl.Rotate(0, normal.X, normal.Y, normal.Z);
 
+
+
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
 				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
-				Gl.DrawArrays(PrimitiveType.Triangles, 0, 12 * 3);
+				//Gl.DrawArrays(PrimitiveType.Triangles, 0, 12 * 3);
+				
+				Gl.EnableVertexAttribArray(1);
+				Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
+				Gl.VertexAttribPointer(1, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
+
+				Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
+				Gl.DrawElements(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero);
 				Gl.DisableVertexAttribArray(0);
+				Gl.DisableVertexAttribArray(1);
+
 			}
 
 			Gl.LoadIdentity();
@@ -285,9 +297,17 @@ namespace LiquidConnections
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			Gl.Enable(EnableCap.Normalize);
 
-			vertexDataBuffer = Gl.GenVertexArray();
+			vertexDataBuffer = Gl.GenBuffer();
 			Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
 			Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (uint)vertexDataValues.Length, vertexDataValues, BufferUsage.StaticDraw);
+
+			colorDataBuffer = Gl.GenBuffer();
+			Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
+			Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (uint)colorDataValues.Length, colorDataValues, BufferUsage.StaticDraw);
+
+			indexDataBuffer = Gl.GenBuffer();
+			Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
+			Gl.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * (uint)indexDataValues.Length, indexDataValues, BufferUsage.StaticDraw);
 		}
 	}
 }
