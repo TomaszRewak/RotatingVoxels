@@ -105,13 +105,15 @@ namespace LiquidConnections
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
 			var voxelSpaceBuilder = new VoxelSpaceBuilder(40, 40, 40);
-			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(10, 10, 10, 30, 30, 30)));
+			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 40, 40, 40)));
 
 			voxelizedBunny = voxelSpaceBuilder.Build();
 
 			var voxelSpaceConbiner = new VoxelSpaceCombiner(80, 40, 40);
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(0, 0, 0));
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(40, 0, 0));
+
+			//voxelizedBunny = voxelSpaceConbiner.VoxelSpace;
 
 			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceConbiner.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
 
@@ -182,6 +184,46 @@ namespace LiquidConnections
 			return matrix;
 		}
 
+		static uint vertexDataBuffer;
+		static float[] vertexDataValues = {
+			-1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f,-1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f,-1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f
+		};
+
 		static int offset = 0;
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
@@ -193,50 +235,6 @@ namespace LiquidConnections
 			Gl.Translate(Math.Cos(offset * 0.01) * 3, Math.Cos(offset * 0.023) * 3, -7.0f);
 			offset++;
 
-			//Gl.Begin(PrimitiveType.Quads);
-
-			//Gl.Color3(0.0f, 1.0f, 0.0f);     // Green
-			//Gl.Vertex3(1.0f, 1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, 1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, 1.0f, 1.0f);
-			//Gl.Vertex3(1.0f, 1.0f, 1.0f);
-
-			//// Bottom face (y = -1.0f)
-			//Gl.Color3(1.0f, 0.5f, 0.0f);     // Orange
-			//Gl.Vertex3(1.0f, -1.0f, 1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, 1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, -1.0f);
-			//Gl.Vertex3(1.0f, -1.0f, -1.0f);
-
-			//// Front face  (z = 1.0f)
-			//Gl.Color3(1.0f, 0.0f, 0.0f);     // Red
-			//Gl.Vertex3(1.0f, 1.0f, 1.0f);
-			//Gl.Vertex3(-1.0f, 1.0f, 1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, 1.0f);
-			//Gl.Vertex3(1.0f, -1.0f, 1.0f);
-
-			//// Back face (z = -1.0f)
-			//Gl.Color3(1.0f, 1.0f, 0.0f);     // Yellow
-			//Gl.Vertex3(1.0f, -1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, 1.0f, -1.0f);
-			//Gl.Vertex3(1.0f, 1.0f, -1.0f);
-
-			//// Left face (x = -1.0f)
-			//Gl.Color3(0.0f, 0.0f, 1.0f);     // Blue
-			//Gl.Vertex3(-1.0f, 1.0f, 1.0f);
-			//Gl.Vertex3(-1.0f, 1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, -1.0f);
-			//Gl.Vertex3(-1.0f, -1.0f, 1.0f);
-
-			//// Right face (x = 1.0f)
-			//Gl.Color3(1.0f, 0.0f, 1.0f);     // Magenta
-			//Gl.Vertex3(1.0f, 1.0f, -1.0f);
-			//Gl.Vertex3(1.0f, 1.0f, 1.0f);
-			//Gl.Vertex3(1.0f, -1.0f, 1.0f);
-			//Gl.Vertex3(1.0f, -1.0f, -1.0f);
-			//Gl.End();  // End of drawing color-cube
-
 			Gl.LoadIdentity();
 			Gl.Translate(0, 0, -7.0f);
 
@@ -244,110 +242,35 @@ namespace LiquidConnections
 			{
 				float distance = voxelizedBunny.At(coordinates).Distance;
 				var normal = voxelizedBunny.At(coordinates).Normal.Normalize();
-				float weight = distance < 1 ? 0.6f : distance < 2 ? 0.3f : distance < 3 ? 0.1f : 0f;
+				float weight = distance < 1 ? 1f : distance < 2 ? 0.5f : 0f;
 				//float weight = distance < 1 ? 0.5f : 0f;
 
 				if (weight <= 0)
 					continue;
 
 				Gl.LoadIdentity();
-				Gl.Translate(20 - coordinates.X, 20 - coordinates.Y, coordinates.Z - 50.0f);
-				Gl.Scale(weight, weight, weight);
+				Gl.Translate(20 - coordinates.X, 20 - coordinates.Y, coordinates.Z - 80.0f);
+				Gl.Scale(weight * 0.3f, weight * 0.3f, weight * 0.3f);
 				Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
 				Gl.Rotate(0, normal.X, normal.Y, normal.Z);
 
-				Gl.Begin(PrimitiveType.Quads);
-				// top
-				Gl.Color3(0.3f, 0.3f, 0.3f);
-				Gl.Normal3(0.0f, 1.0f, 0.0f);
-				Gl.Vertex3(-0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(0.5f, 0.5f, -0.5f);
-				Gl.Vertex3(-0.5f, 0.5f, -0.5f);
-
-				Gl.End();
-
-				Gl.Begin(PrimitiveType.Quads);
-				// front
-				Gl.Color3(0.3f, 1.0f, 0.3f);
-				Gl.Normal3(0.0f, 0.0f, 1.0f);
-				Gl.Vertex3(0.5f, -0.5f, 0.5f);
-				Gl.Vertex3(0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, -0.5f, 0.5f);
-
-				Gl.End();
-
-				Gl.Begin(PrimitiveType.Quads);
-				// right
-				Gl.Color3(0.3f, 0.3f, 0.3f);
-				Gl.Normal3(1.0f, 0.0f, 0.0f);
-				Gl.Vertex3(0.5f, 0.5f, -0.5f);
-				Gl.Vertex3(0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(0.5f, -0.5f, 0.5f);
-				Gl.Vertex3(0.5f, -0.5f, -0.5f);
-
-				Gl.End();
-
-				Gl.Begin(PrimitiveType.Quads);
-				// left
-				Gl.Color3(0.3f, 0.3f, 0.3f);
-				Gl.Normal3(-1.0f, 0.0f, 0.0f);
-				Gl.Vertex3(-0.5f, -0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, 0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, 0.5f, -0.5f);
-				Gl.Vertex3(-0.5f, -0.5f, -0.5f);
-
-				Gl.End();
-
-				Gl.Begin(PrimitiveType.Quads);
-				// bottom
-				Gl.Color3(0.3f, 0.3f, 0.3f);
-				Gl.Normal3(0.0f, -1.0f, 0.0f);
-				Gl.Vertex3(0.5f, -0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, -0.5f, 0.5f);
-				Gl.Vertex3(-0.5f, -0.5f, -0.5f);
-				Gl.Vertex3(0.5f, -0.5f, -0.5f);
-
-				Gl.End();
-
-				Gl.Begin(PrimitiveType.Quads);
-				// back
-				Gl.Color3(0.3f, 0.3f, 1.0f);
-				Gl.Normal3(0.0f, 0.0f, -1.0f);
-				Gl.Vertex3(0.5f, 0.5f, -0.5f);
-				Gl.Vertex3(0.5f, -0.5f, -0.5f);
-				Gl.Vertex3(-0.5f, -0.5f, -0.5f);
-				Gl.Vertex3(-0.5f, 0.5f, -0.5f);
-
-				Gl.End();
+				Gl.EnableVertexAttribArray(0);
+				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
+				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
+				Gl.DrawArrays(PrimitiveType.Triangles, 0, 12 * 3);
+				Gl.DisableVertexAttribArray(0);
 			}
 
 			Gl.LoadIdentity();
 
 			Gl.Translate(0.0f, 0.0f, -7.0f);
-			Gl.Begin(PrimitiveType.Triangles);
-
-			var bunnySpan = bunny.AsSpan();
-			for (int i = 0; i < bunnySpan.Length; i++)
-			{
-				ref var face = ref bunnySpan[i];
-
-				Gl.Normal3(Math.Sin(offset * 0.003) * face.A.Normal.Z + Math.Cos(offset * 0.003) * face.A.Normal.X, face.A.Normal.Y, -Math.Sin(offset * 0.003) * face.A.Normal.X + Math.Cos(offset * 0.003) * face.A.Normal.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.003) * face.A.Point.Z + Math.Cos(offset * 0.003) * face.A.Point.X, face.A.Point.Y, -Math.Sin(offset * 0.003) * face.A.Point.X + Math.Cos(offset * 0.003) * face.A.Point.Z);
-				Gl.Normal3(Math.Sin(offset * 0.003) * face.B.Normal.Z + Math.Cos(offset * 0.003) * face.B.Normal.X, face.B.Normal.Y, -Math.Sin(offset * 0.003) * face.B.Normal.X + Math.Cos(offset * 0.003) * face.B.Normal.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.003) * face.B.Point.Z + Math.Cos(offset * 0.003) * face.B.Point.X, face.B.Point.Y, -Math.Sin(offset * 0.003) * face.B.Point.X + Math.Cos(offset * 0.003) * face.B.Point.Z);
-				Gl.Normal3(Math.Sin(offset * 0.003) * face.C.Normal.Z + Math.Cos(offset * 0.003) * face.C.Normal.X, face.C.Normal.Y, -Math.Sin(offset * 0.003) * face.C.Normal.X + Math.Cos(offset * 0.003) * face.C.Normal.Z);
-				Gl.Vertex3(Math.Sin(offset * 0.003) * face.C.Point.Z + Math.Cos(offset * 0.003) * face.C.Point.X, face.C.Point.Y, -Math.Sin(offset * 0.003) * face.C.Point.X + Math.Cos(offset * 0.003) * face.C.Point.Z);
-			}
-			Gl.End();
 
 			Gl.LoadIdentity();
 		}
 
 		private static void Initialize()
 		{
-			Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 1.0f, 0.3f, 0.3f, 1.0f });
+			Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 0.3f, 0.3f, 0.3f, 1.0f });
 			Gl.Light(LightName.Light0, LightParameter.Position, new[] { 1.0f, 1.0f, 13.0f, 0.0f });
 			Gl.Enable(EnableCap.ColorMaterial);
 
@@ -360,6 +283,11 @@ namespace LiquidConnections
 			Gl.DepthFunc(DepthFunction.Lequal);
 			Gl.ShadeModel(ShadingModel.Smooth);
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+			Gl.Enable(EnableCap.Normalize);
+
+			vertexDataBuffer = Gl.GenVertexArray();
+			Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
+			Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (uint)vertexDataValues.Length, vertexDataValues, BufferUsage.StaticDraw);
 		}
 	}
 }

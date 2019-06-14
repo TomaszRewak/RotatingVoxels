@@ -43,7 +43,7 @@ namespace LiquidConnections.VoxelSpace
 			target = new VoxelCell
 			{
 				Normal = (target.Normal + probe.Normal).Normalize(),
-				Distance = Math.Max(0, target.Distance - (_distance - probe.Distance))
+				Distance = Math.Min(target.Distance, probe.Distance)
 			};
 		}
 
