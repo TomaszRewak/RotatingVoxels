@@ -226,6 +226,7 @@ namespace LiquidConnections
 		};
 
 		static uint program;
+		static uint coordinatesBuffer;
 
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
@@ -235,21 +236,30 @@ namespace LiquidConnections
 			
 			Gl.UseProgram(program);
 
+			float[] weights = new float[40 * 40 * 40];
+			int i = 0;
 			foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
-				float distance = voxelizedBunny.At(coordinates).Distance;
-				var normal = voxelizedBunny.At(coordinates).Normal.Normalize();
-				float weight = distance < 1 ? 1f : distance < 2 ? 0.5f : 0f;
+				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : 0;
+			}
+
+			//foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
+			{
+				//float distance = voxelizedBunny.At(coordinates).Distance;
+				//var normal = voxelizedBunny.At(coordinates).Normal.Normalize();
+				//float weight = distance < 1 ? 1f : distance < 2 ? 0.5f : 0f;
 				//float weight = distance < 1 ? 0.5f : 0f;
 
-				if (weight <= 0)
-					continue;
+				//if (weight <= 0)
+				//	continue;
 
-				Gl.LoadIdentity();
-				Gl.Translate(20 - coordinates.X, 20 - coordinates.Y, coordinates.Z - 80.0f);
-				Gl.Scale(weight * 0.3f, weight * 0.3f, weight * 0.3f);
-				Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
-				Gl.Rotate(0, normal.X, normal.Y, normal.Z);
+				//Gl.LoadIdentity();
+				//Gl.Translate(20 - coordinates.X, 20 - coordinates.Y, coordinates.Z - 80.0f);
+				//Gl.Scale(weight * 0.3f, weight * 0.3f, weight * 0.3f);
+				//Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
+				//Gl.Rotate(0, normal.X, normal.Y, normal.Z);
+
+				Gl.Uniform1(Gl.GetUniformLocation(program, "weights"), weights);
 
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
@@ -262,7 +272,7 @@ namespace LiquidConnections
 
 				Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
 
-				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 2);
+				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 40 * 40 * 40);
 				Gl.DisableVertexAttribArray(0);
 				Gl.DisableVertexAttribArray(1);
 

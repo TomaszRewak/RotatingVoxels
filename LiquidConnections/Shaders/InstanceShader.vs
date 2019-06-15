@@ -5,8 +5,13 @@ layout (location = 1) in vec3 aColor;
 
 out vec3 fColor;
 
+uniform float weights[64];
+
 void main()
 {
-    gl_Position = vec4(aPos.x * 0.5 + gl_InstanceID * 0.3, aPos.y * 0.5 + gl_InstanceID * 0.3, aPos.z * 0.5, 1.0);
+	float weight = 1;
+	vec3 coordinates = vec3(gl_InstanceID % 40 - 20, gl_InstanceID / 40 % 40 - 20, gl_InstanceID / 40 / 40 % 40 - 20);
+
+    gl_Position = vec4((aPos * 0.3 * weight + coordinates) * 0.03, 1.0);
     fColor = aColor;
 } 
