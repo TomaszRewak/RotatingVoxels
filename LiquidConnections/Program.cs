@@ -10,6 +10,7 @@ using System;
 //using OpenGL;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -210,7 +211,6 @@ namespace LiquidConnections
 
 		static uint indexDataBuffer;
 		static ushort[] indexDataValues = {
-			// front
 			0, 1, 2,
 			2, 3, 0,
 			1, 5, 6,
@@ -225,19 +225,15 @@ namespace LiquidConnections
 			6, 7, 3
 		};
 
-		static int offset = 0;
+		static uint program;
+
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			Gl.MatrixMode(MatrixMode.Modelview);
-
-			Gl.LoadIdentity();
-			Gl.Translate(Math.Cos(offset * 0.01) * 3, Math.Cos(offset * 0.023) * 3, -7.0f);
-			offset++;
-
-			Gl.LoadIdentity();
-			Gl.Translate(0, 0, -7.0f);
+			
+			Gl.UseProgram(program);
 
 			foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
@@ -255,8 +251,6 @@ namespace LiquidConnections
 				Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
 				Gl.Rotate(0, normal.X, normal.Y, normal.Z);
 
-
-
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
 				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
@@ -267,11 +261,14 @@ namespace LiquidConnections
 				Gl.VertexAttribPointer(1, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
 
 				Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
-				Gl.DrawElements(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero);
+
+				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 1);
 				Gl.DisableVertexAttribArray(0);
 				Gl.DisableVertexAttribArray(1);
 
 			}
+
+			Gl.UseProgram(0);
 
 			Gl.LoadIdentity();
 
@@ -282,7 +279,7 @@ namespace LiquidConnections
 
 		private static void Initialize()
 		{
-			Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 0.3f, 0.3f, 0.3f, 1.0f });
+			Gl.Light(LightName.Light0, LightParameter.Diffuse, new[] { 0.7f, 0.7f, 0.7f, 1.0f });
 			Gl.Light(LightName.Light0, LightParameter.Position, new[] { 1.0f, 1.0f, 13.0f, 0.0f });
 			Gl.Enable(EnableCap.ColorMaterial);
 
@@ -308,6 +305,43 @@ namespace LiquidConnections
 			indexDataBuffer = Gl.GenBuffer();
 			Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
 			Gl.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * (uint)indexDataValues.Length, indexDataValues, BufferUsage.StaticDraw);
+
+			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
+			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });
+			Gl.CompileShader(vertexShader);
+
+			Gl.GetShader(vertexShader, ShaderParameterName.CompileStatus, out var success1);
+			if (success1 == 0)
+			{
+				StringBuilder infoLog = new StringBuilder(1024);
+				Gl.GetShaderInfoLog(vertexShader, 1024, out int _, infoLog);
+				Console.WriteLine("Errors: \n{0}", infoLog);
+				throw new InvalidProgramException();
+			}
+
+			var fragmentShader = Gl.CreateShader(ShaderType.FragmentShader);
+			Gl.ShaderSource(fragmentShader, new[] { File.ReadAllText("./Shaders/InstanceShader.fs") });
+			Gl.CompileShader(fragmentShader);
+
+			Gl.GetShader(fragmentShader, ShaderParameterName.CompileStatus, out var success2);
+			if (success2 == 0)
+			{
+				StringBuilder infoLog = new StringBuilder(1024);
+				Gl.GetShaderInfoLog(fragmentShader, 1024, out int _, infoLog);
+				Console.WriteLine("Errors: \n{0}", infoLog);
+				throw new InvalidProgramException();
+			}
+
+			program = Gl.CreateProgram();
+			Gl.AttachShader(program, vertexShader);
+			Gl.AttachShader(program, fragmentShader);
+			Gl.LinkProgram(program);
+
+			Gl.GetProgram(program, ProgramProperty.LinkStatus, out var success3);
+			if (success3 == 0)
+			{
+				throw new InvalidProgramException();
+			}
 		}
 	}
 }
