@@ -262,7 +262,7 @@ namespace LiquidConnections
 
 				Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
 
-				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 1);
+				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 2);
 				Gl.DisableVertexAttribArray(0);
 				Gl.DisableVertexAttribArray(1);
 
