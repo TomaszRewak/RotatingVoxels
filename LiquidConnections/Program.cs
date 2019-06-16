@@ -110,7 +110,7 @@ namespace LiquidConnections
 
 			voxelizedBunny = voxelSpaceBuilder.Build();
 
-			var voxelSpaceConbiner = new VoxelSpaceCombiner(80, 40, 40);
+			var voxelSpaceConbiner = new VoxelSpaceCombiner(40, 40, 40);
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(0, 0, 0));
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(40, 0, 0));
 
@@ -227,6 +227,7 @@ namespace LiquidConnections
 
 		static uint program;
 		static uint coordinatesBuffer;
+		static uint weightsBuffer;
 
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
@@ -242,6 +243,9 @@ namespace LiquidConnections
 			{
 				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : 0;
 			}
+
+			Gl.BindBuffer(BufferTarget.ShaderStorageBuffer, weightsBuffer);
+			Gl.BufferData(BufferTarget.ShaderStorageBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicCopy);
 
 			//foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
@@ -259,7 +263,14 @@ namespace LiquidConnections
 				//Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
 				//Gl.Rotate(0, normal.X, normal.Y, normal.Z);
 
-				Gl.Uniform1(Gl.GetUniformLocation(program, "weights"), weights);
+				//Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
+				var loc = Gl.GetProgramResourceIndex(program, ProgramInterface.ShaderStorageBlock, "shader_data");
+
+				Gl.BindBufferRange(BufferTarget.ShaderStorageBuffer, 2, weightsBuffer, IntPtr.Zero, 40*40*40*sizeof(float));
+
+
+
+
 
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
@@ -316,6 +327,9 @@ namespace LiquidConnections
 			Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
 			Gl.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * (uint)indexDataValues.Length, indexDataValues, BufferUsage.StaticDraw);
 
+			weightsBuffer = Gl.GenBuffer();
+			Gl.BindBuffer(BufferTarget.ArrayBuffer, weightsBuffer);
+
 			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
 			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });
 			Gl.CompileShader(vertexShader);
@@ -350,6 +364,10 @@ namespace LiquidConnections
 			Gl.GetProgram(program, ProgramProperty.LinkStatus, out var success3);
 			if (success3 == 0)
 			{
+				StringBuilder infoLog = new StringBuilder(1024);
+				var error = Gl.GetError();
+				Gl.GetProgramInfoLog(program, 1024, out int _, infoLog);
+				Console.WriteLine("Errors: \n{0}", infoLog);
 				throw new InvalidProgramException();
 			}
 		}
