@@ -226,15 +226,15 @@ namespace LiquidConnections
 		};
 
 		static uint program;
-		static uint coordinatesBuffer;
 		static uint weightsBuffer;
+		static uint weightsTexture;
 
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			Gl.MatrixMode(MatrixMode.Modelview);
-			
+
 			Gl.UseProgram(program);
 
 			float[] weights = new float[40 * 40 * 40];
@@ -243,9 +243,10 @@ namespace LiquidConnections
 			{
 				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : 0;
 			}
+			weights = weights.Reverse().ToArray();
 
-			Gl.BindBuffer(BufferTarget.ShaderStorageBuffer, weightsBuffer);
-			Gl.BufferData(BufferTarget.ShaderStorageBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicCopy);
+			//Gl.BindBuffer(BufferTarget.ShaderStorageBuffer, weightsBuffer);
+			//Gl.BufferData(BufferTarget.ShaderStorageBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicCopy);
 
 			//foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
@@ -264,19 +265,23 @@ namespace LiquidConnections
 				//Gl.Rotate(0, normal.X, normal.Y, normal.Z);
 
 				//Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
-				var loc = Gl.GetProgramResourceIndex(program, ProgramInterface.ShaderStorageBlock, "shader_data");
+				//var loc = Gl.GetProgramResourceIndex(program, ProgramInterface.ShaderStorageBlock, "shader_data");
+				//Gl.BindBufferRange(BufferTarget.ShaderStorageBuffer, 2, weightsBuffer, IntPtr.Zero, 40*40*40*sizeof(float));
+				
+				Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
+				Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
 
-				Gl.BindBufferRange(BufferTarget.ShaderStorageBuffer, 2, weightsBuffer, IntPtr.Zero, 40*40*40*sizeof(float));
-
-
-
+				Gl.ActiveTexture(TextureUnit.Texture1);
+				Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
+				Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.R32f, weightsBuffer);
+				Gl.Uniform1i(Gl.GetUniformLocation(program, "weights"), 1, weightsTexture);
 
 
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
 				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
 				//Gl.DrawArrays(PrimitiveType.Triangles, 0, 12 * 3);
-				
+
 				Gl.EnableVertexAttribArray(1);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
 				Gl.VertexAttribPointer(1, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
@@ -328,7 +333,7 @@ namespace LiquidConnections
 			Gl.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * (uint)indexDataValues.Length, indexDataValues, BufferUsage.StaticDraw);
 
 			weightsBuffer = Gl.GenBuffer();
-			Gl.BindBuffer(BufferTarget.ArrayBuffer, weightsBuffer);
+			weightsTexture = Gl.GenTexture();
 
 			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
 			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });
