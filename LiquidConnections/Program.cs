@@ -101,6 +101,7 @@ namespace LiquidConnections
 			//stopwatch.Stop();
 			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
+
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -126,7 +127,7 @@ namespace LiquidConnections
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{
 				nativeWindow.DepthBits = 24;
-				nativeWindow.Create(100, 100, 640, 480, NativeWindowStyle.Overlapped);
+				nativeWindow.Create(100, 100, 640, 640, NativeWindowStyle.Overlapped);
 				nativeWindow.Show();
 				nativeWindow.Render += Render;
 				nativeWindow.Resize += Resize;
@@ -229,6 +230,7 @@ namespace LiquidConnections
 		static uint weightsBuffer;
 		static uint weightsTexture;
 
+		static int iteration = 0;
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -241,7 +243,7 @@ namespace LiquidConnections
 			int i = 0;
 			foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
-				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : 0;
+				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : voxelizedBunny.At(coordinates).Distance < 2 ? 0.3f : 0;
 			}
 			weights = weights.Reverse().ToArray();
 
@@ -267,7 +269,23 @@ namespace LiquidConnections
 				//Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
 				//var loc = Gl.GetProgramResourceIndex(program, ProgramInterface.ShaderStorageBlock, "shader_data");
 				//Gl.BindBufferRange(BufferTarget.ShaderStorageBuffer, 2, weightsBuffer, IntPtr.Zero, 40*40*40*sizeof(float));
-				
+
+				float n = 1f;
+				float f = 10000f;
+				float r = 0.5f;
+				float t = 0.5f;
+
+				Matrix4x4f transformation = new Matrix4x4f(
+					n / r, 0, 0, 0,
+					0, n / t, 0, 0,
+					0, 0, -(f + n) / (f - n), -2 * f * n / (f - n),
+					0, 0, -1, 0
+					);
+
+				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.001) * 0.8f, 0.8f, (float)Math.Cos(iteration * 0.001) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, 1, 0));
+
+				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
+
 				Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
 				Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
 
@@ -301,6 +319,8 @@ namespace LiquidConnections
 			Gl.Translate(0.0f, 0.0f, -7.0f);
 
 			Gl.LoadIdentity();
+
+			iteration++;
 		}
 
 		private static void Initialize()
