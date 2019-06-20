@@ -81,7 +81,7 @@ namespace LiquidConnections
 			//	texture.Set(i, bunnyFloat[i]);
 
 			for (int i = 0; i < 40 * 40 * 40; i++)
-				weightsBauffer.Set(i, 0);
+				weightsBauffer.Set(i, 0.5f);
 
 		}
 
@@ -290,11 +290,20 @@ namespace LiquidConnections
 			//Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
 			//Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
 
-			Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
-			var ptr = Gl.MapBuffer(BufferTarget.TextureBuffer, BufferAccess.ReadWrite);
-			CopyToTexture(ptr);
-			Gpu.Default.Synchronize();
-			Gl.UnmapBuffer(BufferTarget.TextureBuffer);
+			//Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
+
+			unsafe
+			{
+				IntPtr a;
+				IntPtr b;
+				CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
+				CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
+				CopyToTexture(a);
+				Gpu.Default.Synchronize();
+				CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
+				CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
+			}
+			//Gl.UnmapBuffer(BufferTarget.TextureBuffer);
 
 			//Gl.BindBuffer(BufferTarget.ShaderStorageBuffer, weightsBuffer);
 			//Gl.BufferData(BufferTarget.ShaderStorageBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicCopy);
