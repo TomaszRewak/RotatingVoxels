@@ -36,6 +36,7 @@ namespace LiquidConnections
 		{
 			var start = blockIdx.x * blockDim.x + threadIdx.x;
 			var stride = gridDim.x * blockDim.x;
+
 			for (var i = start; i < result.Length; i += stride)
 				for (int j = 0; j < arg1.Length; j++)
 					result[i] = Add(arg1[i], arg2[j]);
@@ -73,28 +74,33 @@ namespace LiquidConnections
 			return result;
 		}
 
-		private static void BunnyKernel(deviceptr<float> weightsBauffer)
+		private static void BunnyKernel(deviceptr<float> weightsBauffer, float[] weights)
 		{
+			var length = 40 * 40 * 40;
+			var start = length * (threadIdx.x    ) / blockDim.x;
+			var end   = length * (threadIdx.x + 1) / blockDim.x;
+
 			//weightsBauffer.Set(0, 0.5f);
 
 			//for (int i = 0; i < gpuBunny.Length; i++)
 			//	texture.Set(i, bunnyFloat[i]);
 
-			for (int i = 0; i < 40 * 40 * 40; i++)
-				weightsBauffer.Set(i, 0.5f);
+			for (int i = start; i < end; i++)
+				weightsBauffer.Set(i, weights[i]);
 
 		}
 
 		[GpuManaged]
 		private static void CopyToTexture(IntPtr ptr)
 		{
-			var lp = new LaunchParam(16, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr));
+			var lp = new LaunchParam(1, 256);
+			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights);
 		}
 
 		static VoxelCell[,,] voxelizedBunny;
 		static Face[] bunny;
 		static float[] bunnyFloat;
+		static float[] gpuBunnyWeights;
 		static Face[] gpuBunny;
 		static Face[] gpuCombined;
 
@@ -150,6 +156,20 @@ namespace LiquidConnections
 			Gpu.Copy(bunny, gpuBunny);
 
 			gpuCombined = Gpu.Default.Allocate<Face>(40 * 40 * 40);
+
+
+
+
+			float[] weights = new float[40 * 40 * 40];
+			int i = 0;
+			foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
+			{
+				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : voxelizedBunny.At(coordinates).Distance < 2 ? 0.3f : 0;
+			}
+			weights = weights.Reverse().ToArray();
+			gpuBunnyWeights = Gpu.Default.Allocate<float>(40 * 40 * 40);
+			Gpu.Copy(weights, gpuBunnyWeights);
+
 
 			weightsMemory = Gpu.Default.AllocateDevice<float>(40 * 40 * 40);
 
@@ -278,14 +298,6 @@ namespace LiquidConnections
 			Gl.MatrixMode(MatrixMode.Modelview);
 
 			Gl.UseProgram(program);
-
-			float[] weights = new float[40 * 40 * 40];
-			int i = 0;
-			//foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
-			//{
-			//	weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : voxelizedBunny.At(coordinates).Distance < 2 ? 0.3f : 0;
-			//}
-			weights = weights.Reverse().ToArray();
 
 			//Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
 			//Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
