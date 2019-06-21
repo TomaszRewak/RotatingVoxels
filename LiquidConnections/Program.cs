@@ -90,8 +90,24 @@ namespace LiquidConnections
 
 		}
 
-		[GpuManaged]
 		private static void CopyToTexture(IntPtr ptr)
+		{
+			var lp = new LaunchParam(1, 256);
+			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights);
+		}
+
+		private static void Clear(deviceptr<float> weightsBauffer)
+		{
+			var length = 40 * 40 * 40;
+			var start = length * (threadIdx.x) / blockDim.x;
+			var end = length * (threadIdx.x + 1) / blockDim.x;
+
+			for (int i = start; i < end; i++)
+				weightsBauffer.Set(i, 0f);
+
+		}
+
+		private static void Clear(IntPtr ptr)
 		{
 			var lp = new LaunchParam(1, 256);
 			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights);
@@ -310,6 +326,9 @@ namespace LiquidConnections
 				IntPtr b;
 				CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
 				CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
+				Clear(a);
+				CopyToTexture(a);
+				CopyToTexture(a);
 				CopyToTexture(a);
 				Gpu.Default.Synchronize();
 				CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
