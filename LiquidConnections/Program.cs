@@ -74,11 +74,12 @@ namespace LiquidConnections
 			return result;
 		}
 
-		private static void BunnyKernel(deviceptr<float> weightsBauffer, float[] weights)
+		private static void BunnyKernel(deviceptr<float> weightsBauffer, float[] weights, float xOffset)
 		{
 			var length = 40 * 40 * 40;
 			var start = length * (threadIdx.x    ) / blockDim.x;
 			var end   = length * (threadIdx.x + 1) / blockDim.x;
+			int offset = (int)Math.Floor(xOffset);
 
 			//weightsBauffer.Set(0, 0.5f);
 
@@ -86,14 +87,32 @@ namespace LiquidConnections
 			//	texture.Set(i, bunnyFloat[i]);
 
 			for (int i = start; i < end; i++)
-				weightsBauffer.Set(i, weights[i]);
+			{
+				int x = i % 40;
+				int y = i / 40 % 40;
+				int z = i / 40 / 40 % 40;
+
+				x = x + offset;
+				xOffset = xOffset - (float)Math.Floor(xOffset);
+
+				int x1 = x;
+				int x2 = x + 1;
+
+				x1 = x1 % 40;
+				x2 = x2 % 40;
+
+				int i1 = (x1 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
+				int i2 = (x2 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
+
+				weightsBauffer.Set(i, weights[i1] * (1 - xOffset) + weights[i2] * xOffset);
+			}
 
 		}
 
-		private static void CopyToTexture(IntPtr ptr)
+		private static void CopyToTexture(IntPtr ptr, float xOffset)
 		{
 			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights);
+			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights, xOffset * 0.2f);
 		}
 
 		private static void Clear(deviceptr<float> weightsBauffer)
@@ -110,7 +129,7 @@ namespace LiquidConnections
 		private static void Clear(IntPtr ptr)
 		{
 			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights);
+			Gpu.Default.Launch(Clear, lp, new deviceptr<float>(ptr));
 		}
 
 		static VoxelCell[,,] voxelizedBunny;
@@ -327,9 +346,7 @@ namespace LiquidConnections
 				CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
 				CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
 				Clear(a);
-				CopyToTexture(a);
-				CopyToTexture(a);
-				CopyToTexture(a);
+				CopyToTexture(a, iteration * 0.05f);
 				Gpu.Default.Synchronize();
 				CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
 				CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
@@ -371,7 +388,7 @@ namespace LiquidConnections
 					0, 0, -1, 0
 					);
 
-				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.01) * 0.8f, 0.8f, (float)Math.Cos(iteration * 0.01) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, 1, 0));
+				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.001) * 0.8f, 0.8f, (float)Math.Cos(iteration * 0.001) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, 1, 0));
 
 				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
 
