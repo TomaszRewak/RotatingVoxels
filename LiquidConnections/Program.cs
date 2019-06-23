@@ -74,7 +74,7 @@ namespace LiquidConnections
 			return result;
 		}
 
-		private static void BunnyKernel(deviceptr<float> weightsBauffer, float[] weights, float xOffset)
+		private static void BunnyKernel(deviceptr<float> weightsBauffer, VoxelCell[] shape, float xOffset)
 		{
 			var length = 40 * 40 * 40;
 			var start = length * (threadIdx.x    ) / blockDim.x;
@@ -92,6 +92,9 @@ namespace LiquidConnections
 				int y = i / 40 % 40;
 				int z = i / 40 / 40 % 40;
 
+				var coordinates = DiscreteCoordinates.At(x, y, z);
+				var bounds = DiscreteBounds.OfSize(40, 40, 40);
+
 				x = x + offset;
 				xOffset = xOffset - (float)Math.Floor(xOffset);
 
@@ -104,7 +107,12 @@ namespace LiquidConnections
 				int i1 = (x1 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
 				int i2 = (x2 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
 
-				weightsBauffer.Set(i, weights[i1] * (1 - xOffset) + weights[i2] * xOffset);
+				ref var cell = ref shape[bounds.Index(coordinates)];
+				var distance = Vector.Between(coordinates.AsVertex(), cell.NearestIntersection).Length;
+
+				var weight = Math.Max(0f, 1f - distance / 2);
+
+				weightsBauffer.Set(i, weight);
 			}
 
 		}
@@ -112,7 +120,7 @@ namespace LiquidConnections
 		private static void CopyToTexture(IntPtr ptr, float xOffset)
 		{
 			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunnyWeights, xOffset * 0.2f);
+			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunny, xOffset * 0.2f);
 		}
 
 		private static void Clear(deviceptr<float> weightsBauffer)
@@ -135,9 +143,8 @@ namespace LiquidConnections
 		static VoxelCell[,,] voxelizedBunny;
 		static Face[] bunny;
 		static float[] bunnyFloat;
-		static float[] gpuBunnyWeights;
-		static Face[] gpuBunny;
-		static Face[] gpuCombined;
+		static VoxelCell[] gpuBunny;
+		static VoxelCell[] gpuCombined;
 
 		static void Main(string[] args)
 		{
@@ -168,44 +175,27 @@ namespace LiquidConnections
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			var voxelSpaceBuilder = new VoxelSpaceBuilder(40, 40, 40);
-			voxelSpaceBuilder.Add(ShapeNormalizer.NormalizeShape(bunny, new Bounds(0, 0, 0, 40, 40, 40)));
+			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(5, 5, 5, 25, 25, 25)), DiscreteBounds.OfSize(40, 40, 40));
 
-			voxelizedBunny = voxelSpaceBuilder.Build();
-
-			var voxelSpaceConbiner = new VoxelSpaceCombiner(40, 40, 40);
+			//var voxelSpaceConbiner = new VoxelSpaceCombiner(40, 40, 40);
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(0, 0, 0));
 			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(40, 0, 0));
 
 			//voxelizedBunny = voxelSpaceConbiner.VoxelSpace;
-
-
-			bunny = ShapeNormalizer.NormalizeShape(VoxelSpaceReader.GenerateShape(voxelSpaceConbiner.VoxelSpace), new Bounds(-2, -2, -2, 2, 2, 2));
 
 			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
 
 			stopwatch.Stop();
 			Console.WriteLine($"Pricessing took: {stopwatch.ElapsedMilliseconds}ms");
 
-			gpuBunny = Gpu.Default.Allocate<Face>(40 * 40 * 40);
-			Gpu.Copy(bunny, gpuBunny);
+			var bounds = DiscreteBounds.Of(voxelizedBunny);
+			var flatBunny = new VoxelCell[bounds.Length];
+			foreach (var coordinates in bounds)
+				flatBunny[bounds.Index(coordinates)] = voxelizedBunny.At(coordinates);
 
-			gpuCombined = Gpu.Default.Allocate<Face>(40 * 40 * 40);
-
-
-
-
-			float[] weights = new float[40 * 40 * 40];
-			int i = 0;
-			foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
-			{
-				weights[i++] = voxelizedBunny.At(coordinates).Distance < 1 ? 1 : voxelizedBunny.At(coordinates).Distance < 2 ? 0.3f : 0;
-			}
-			weights = weights.Reverse().ToArray();
-			gpuBunnyWeights = Gpu.Default.Allocate<float>(40 * 40 * 40);
-			Gpu.Copy(weights, gpuBunnyWeights);
-
-
+			gpuBunny = Gpu.Default.Allocate<VoxelCell>(40 * 40 * 40);
+			Gpu.Copy(flatBunny, gpuBunny);
+			
 			weightsMemory = Gpu.Default.AllocateDevice<float>(40 * 40 * 40);
 
 			using (NativeWindow nativeWindow = NativeWindow.Create())
@@ -378,8 +368,8 @@ namespace LiquidConnections
 
 				float n = 1f;
 				float f = 10000f;
-				float r = 0.5f;
-				float t = 0.5f;
+				float r = 0.3f;
+				float t = 0.3f;
 
 				Matrix4x4f transformation = new Matrix4x4f(
 					n / r, 0, 0, 0,
@@ -388,7 +378,7 @@ namespace LiquidConnections
 					0, 0, -1, 0
 					);
 
-				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.001) * 0.8f, 0.8f, (float)Math.Cos(iteration * 0.001) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, 1, 0));
+				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.001) * 0.8f, -0.8f, (float)Math.Cos(iteration * 0.001) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
 				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
 

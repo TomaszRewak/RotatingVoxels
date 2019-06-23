@@ -9,12 +9,12 @@ namespace LiquidConnections.VoxelSpace
 {
 	struct VoxelCell
 	{
-		public float Distance;
+		public Vertex NearestIntersection;
 		public Vector Normal;
 
-		public VoxelCell(float distance, Vector normal)
+		public VoxelCell(Vertex nearestIntersection, Vector normal)
 		{
-			Distance = distance;
+			NearestIntersection = nearestIntersection;
 			Normal = normal;
 		}
 	}

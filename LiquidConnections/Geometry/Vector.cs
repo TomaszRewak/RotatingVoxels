@@ -12,18 +12,24 @@ namespace LiquidConnections.Geometry
 		public float Y;
 		public float Z;
 
-		public Vector(float x, float y, float z)
+		public static Vector To(float x, float y, float z)
 		{
-			X = x;
-			Y = y;
-			Z = z;
+			return new Vector
+			{
+				X = x,
+				Y = y,
+				Z = z
+			};
 		}
 
-		public Vector(in Vertex begin, in Vertex end)
+		public static Vector Between(in Vertex begin, in Vertex end)
 		{
-			X = end.X - begin.X;
-			Y = end.Y - begin.Y;
-			Z = end.Z - begin.Z;
+			return new Vector
+			{
+				X = end.X - begin.X,
+				Y = end.Y - begin.Y,
+				Z = end.Z - begin.Z
+			};
 		}
 
 		public float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z);
@@ -35,7 +41,7 @@ namespace LiquidConnections.Geometry
 
 		public Vector CrossProduct(in Vector second)
 		{
-			return new Vector(
+			return To(
 				Y * second.Z - Z * second.Y,
 				Z * second.X - X * second.Z,
 				X * second.Y - Y * second.X
@@ -46,37 +52,37 @@ namespace LiquidConnections.Geometry
 		{
 			var length = Length;
 
-			return new Vector(X / Length, Y / Length, Z / Length);
+			return To(X / Length, Y / Length, Z / Length);
 		}
 
 		public static Vector operator -(in Vector vectorA)
 		{
-			return new Vector(-vectorA.X, -vectorA.Y, -vectorA.Z);
+			return To(-vectorA.X, -vectorA.Y, -vectorA.Z);
 		}
 
 		public static Vector operator +(in Vector vectorA, in Vector vectorB)
 		{
-			return new Vector(vectorA.X + vectorB.X, vectorA.Y + vectorB.Y, vectorA.Z + vectorB.Z);
+			return To(vectorA.X + vectorB.X, vectorA.Y + vectorB.Y, vectorA.Z + vectorB.Z);
 		}
 
 		public static Vector operator *(in Vector vectorA, in Vector vectorB)
 		{
-			return new Vector(vectorA.X * vectorB.X, vectorA.Y * vectorB.Y, vectorA.Z * vectorB.Z);
+			return To(vectorA.X * vectorB.X, vectorA.Y * vectorB.Y, vectorA.Z * vectorB.Z);
 		}
 
 		public static Vector operator /(in Vector vectorA, in Vector vectorB)
 		{
-			return new Vector(vectorA.X / vectorB.X, vectorA.Y / vectorB.Y, vectorA.Z / vectorB.Z);
+			return To(vectorA.X / vectorB.X, vectorA.Y / vectorB.Y, vectorA.Z / vectorB.Z);
 		}
 
 		public static Vector operator *(in Vector vector, float By)
 		{
-			return new Vector(vector.X * By, vector.Y * By, vector.Z * By);
+			return To(vector.X * By, vector.Y * By, vector.Z * By);
 		}
 
 		public static Vector operator /(in Vector vector, float By)
 		{
-			return new Vector(vector.X / By, vector.Y / By, vector.Z / By);
+			return To(vector.X / By, vector.Y / By, vector.Z / By);
 		}
 	}
 }

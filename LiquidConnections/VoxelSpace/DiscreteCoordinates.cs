@@ -13,11 +13,14 @@ namespace LiquidConnections.VoxelSpace
 		public int Y;
 		public int Z;
 
-		public DiscreteCoordinates(int x, int y, int z)
+		public static DiscreteCoordinates At(int x, int y, int z)
 		{
-			X = x;
-			Y = y;
-			Z = z;
+			return new DiscreteCoordinates
+			{
+				X = x,
+				Y = y,
+				Z = z
+			};
 		}
 
 		public static DiscreteCoordinates Floor(in Vertex point)
@@ -42,17 +45,12 @@ namespace LiquidConnections.VoxelSpace
 
 		public Vertex AsVertex()
 		{
-			return new Vertex(X, Y, Z);
+			return Vertex.At(X, Y, Z);
 		}
 	}
 
 	static class DiscreteCoordinatesExtension
 	{
-		public static ref FullVoxelCell At(this FullVoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
-		{
-			return ref voxelSpace[coordinates.X, coordinates.Y, coordinates.Z];
-		}
-
 		public static ref VoxelCell At(this VoxelCell[,,] voxelSpace, in DiscreteCoordinates coordinates)
 		{
 			return ref voxelSpace[coordinates.X, coordinates.Y, coordinates.Z];

@@ -12,23 +12,26 @@ namespace LiquidConnections.Geometry
 		public float Y;
 		public float Z;
 
-		public Vertex(float x, float y, float z)
+		public static Vertex At(float x, float y, float z)
 		{
-			X = x;
-			Y = y;
-			Z = z;
+			return new Vertex
+			{
+				X = x,
+				Y = y,
+				Z = z
+			};
 		}
 
-		public static Vertex Max => new Vertex(float.MaxValue, float.MaxValue, float.MaxValue);
+		public static Vertex MaxValue => At(float.MaxValue, float.MaxValue, float.MaxValue);
 
 		public static Vertex operator +(in Vertex vertex, in Vector vector)
 		{
-			return new Vertex(vertex.X + vector.X, vertex.Y + vector.Y, vertex.Z + vector.Z);
+			return At(vertex.X + vector.X, vertex.Y + vector.Y, vertex.Z + vector.Z);
 		}
 
 		public static Vertex operator -(in Vertex vertex, in Vector vector)
 		{
-			return new Vertex(vertex.X - vector.X, vertex.Y - vector.Y, vertex.Z - vector.Z);
+			return At(vertex.X - vector.X, vertex.Y - vector.Y, vertex.Z - vector.Z);
 		}
 
 		public static bool operator ==(in Vertex first, in Vertex second)

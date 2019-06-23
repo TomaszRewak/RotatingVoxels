@@ -17,12 +17,12 @@ namespace LiquidConnections.Shapes
 			foreach (var face in faces)
 				shapeBounds += new Bounds(face);
 
-			var minPoint = new Vertex(bounds.MinX, bounds.MinY, bounds.MinZ);
-			var maxPoint = new Vertex(bounds.MaxX, bounds.MaxY, bounds.MaxZ);
-			var minShapePoint = new Vertex(shapeBounds.MinX, shapeBounds.MinY, shapeBounds.MinZ);
-			var maxShapePoint = new Vertex(shapeBounds.MaxX, shapeBounds.MaxY, shapeBounds.MaxZ);
+			var minPoint = Vertex.At(bounds.MinX, bounds.MinY, bounds.MinZ);
+			var maxPoint = Vertex.At(bounds.MaxX, bounds.MaxY, bounds.MaxZ);
+			var minShapePoint = Vertex.At(shapeBounds.MinX, shapeBounds.MinY, shapeBounds.MinZ);
+			var maxShapePoint = Vertex.At(shapeBounds.MaxX, shapeBounds.MaxY, shapeBounds.MaxZ);
 
-			var scaleVector = new Vector(minPoint, maxPoint) / new Vector(minShapePoint, maxShapePoint);
+			var scaleVector = Vector.Between(minPoint, maxPoint) / Vector.Between(minShapePoint, maxShapePoint);
 
 			for (int i = 0; i < faces.Length; i++)
 				normalizedFaces[i] = new Face
@@ -39,7 +39,7 @@ namespace LiquidConnections.Shapes
 		{
 			return new FaceVertex
 			{
-				Point = minPoint + new Vector(vertex.Point, maxShapePoint) * scaleVector,
+				Point = minPoint + Vector.Between(vertex.Point, maxShapePoint) * scaleVector,
 				Normal = (vertex.Normal / scaleVector).Normalize()
 			};
 		}

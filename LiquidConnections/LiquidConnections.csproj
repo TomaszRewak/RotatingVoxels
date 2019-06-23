@@ -96,10 +96,8 @@
     <Compile Include="VoxelSpace\DiscreteCoordinates.cs" />
     <Compile Include="VoxelSpace\DiscreteEdge.cs" />
     <Compile Include="VoxelSpace\VoxelCell.cs" />
-    <Compile Include="VoxelSpace\FullVoxelCell.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceBuilder.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceCombiner.cs" />
-    <Compile Include="VoxelSpace\VoxelSpaceReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

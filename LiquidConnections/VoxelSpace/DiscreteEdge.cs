@@ -20,7 +20,7 @@ namespace LiquidConnections.VoxelSpace
 
 		public Vector AsVector()
 		{
-			return new Vector(Begin.AsVertex(), End.AsVertex());
+			return Vector.Between(Begin.AsVertex(), End.AsVertex());
 		}
 	}
 }

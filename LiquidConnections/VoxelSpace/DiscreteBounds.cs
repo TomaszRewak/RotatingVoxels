@@ -18,6 +18,20 @@ namespace LiquidConnections.VoxelSpace
 		public int MaxY;
 		public int MaxZ;
 
+		public static DiscreteBounds OfSize(int maxX, int maxY, int maxZ)
+		{
+			return new DiscreteBounds
+			{
+				MinX = 0,
+				MinY = 0,
+				MinZ = 0,
+
+				MaxX = maxX,
+				MaxY = maxY,
+				MaxZ = maxZ
+			};
+		}
+
 		public DiscreteBounds(in Bounds bounds)
 		{
 			MinX = (int)Math.Ceiling(bounds.MinX);
@@ -40,7 +54,12 @@ namespace LiquidConnections.VoxelSpace
 			MaxZ = coordinates.Z;
 		}
 
-		public static DiscreteBounds Of<T>(T[,,] voxelSpace)
+		public int Width => MaxX - MinX + 1;
+		public int Height => MaxY - MinY + 1;
+		public int Depth => MaxZ - MinZ + 1;
+		public int Length => Width * Height * Depth;
+
+		public static DiscreteBounds Of(VoxelCell[,,] voxelSpace)
 		{
 			return new DiscreteBounds
 			{
@@ -96,12 +115,20 @@ namespace LiquidConnections.VoxelSpace
 				coordinates.Z >= MinZ && coordinates.Z <= MaxZ;
 		}
 
+		public int Index(in DiscreteCoordinates coordinates)
+		{
+			int width = MaxX - MinX;
+			int height = MaxY - MinY;
+
+			return coordinates.X + coordinates.Y * width + coordinates.Z * width * height;
+		}
+
 		public IEnumerator<DiscreteCoordinates> GetEnumerator()
 		{
 			for (int x = MinX; x <= MaxX; x++)
 				for (int y = MinY; y <= MaxY; y++)
 					for (int z = MinZ; z <= MaxZ; z++)
-						yield return new DiscreteCoordinates(x, y, z);
+						yield return DiscreteCoordinates.At(x, y, z);
 		}
 	}
 }

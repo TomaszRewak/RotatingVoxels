@@ -34,8 +34,8 @@ namespace LiquidConnections.Geometry
 
 		private float Area(in Vertex a, in Vertex b, in Vertex c)
 		{
-			var vectorAB = new Vector(a, b);
-			var vectorAC = new Vector(a, c);
+			var vectorAB = Vector.Between(a, b);
+			var vectorAC = Vector.Between(a, c);
 
 			return vectorAB.CrossProduct(vectorAC).Length / 2;
 		}
