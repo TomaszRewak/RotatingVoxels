@@ -10,7 +10,7 @@ out vec3 fColor;
 
 mat4 lookAt(inout vec3 target)
 {
-	vec3 forward = -normalize(target);
+	vec3 forward = normalize(target);
 	vec3 left = normalize(cross(vec3(0, 1, 0), forward));
 	vec3 up = normalize(cross(forward, left));    // cross product
 
