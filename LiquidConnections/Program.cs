@@ -74,7 +74,7 @@ namespace LiquidConnections
 			return result;
 		}
 
-		private static void BunnyKernel(deviceptr<float> weightsBauffer, VoxelCell[] shape, float xOffset)
+		private static void BunnyKernel(deviceptr<VoxelFace> weightsBauffer, VoxelCell[] shape, float xOffset)
 		{
 			var length = 40 * 40 * 40;
 			var start = length * (threadIdx.x    ) / blockDim.x;
@@ -95,24 +95,17 @@ namespace LiquidConnections
 				var coordinates = DiscreteCoordinates.At(x, y, z);
 				var bounds = DiscreteBounds.OfSize(40, 40, 40);
 
-				x = x + offset;
 				xOffset = xOffset - (float)Math.Floor(xOffset);
-
-				int x1 = x;
-				int x2 = x + 1;
-
-				x1 = x1 % 40;
-				x2 = x2 % 40;
-
-				int i1 = (x1 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
-				int i2 = (x2 + y * 40 + z * 40 * 40) % (40 * 40 * 40);
 
 				ref var cell = ref shape[bounds.Index(coordinates)];
 				var distance = Vector.Between(coordinates.AsVertex(), cell.NearestIntersection).Length;
 
 				var weight = Math.Max(0f, 1f - distance / 2);
 
-				weightsBauffer.Set(i, weight);
+				weightsBauffer.Set(i, new VoxelFace {
+					Weight = weight,
+					Normal = cell.Normal
+				});
 			}
 
 		}
@@ -120,7 +113,7 @@ namespace LiquidConnections
 		private static void CopyToTexture(IntPtr ptr, float xOffset)
 		{
 			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<float>(ptr), gpuBunny, xOffset * 0.2f);
+			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<VoxelFace>(ptr), gpuBunny, xOffset * 0.2f);
 		}
 
 		private static void Clear(deviceptr<float> weightsBauffer)
@@ -148,40 +141,11 @@ namespace LiquidConnections
 
 		static void Main(string[] args)
 		{
-			//var l = 50000;
-
-			//stopwatch = Stopwatch.StartNew();
-			//Run(l);
-			//stopwatch.Stop();
-			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
-			//stopwatch = Stopwatch.StartNew();
-			//RunCPU(l);
-			//stopwatch.Stop();
-			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
-			//stopwatch = Stopwatch.StartNew();
-			//Run(l);
-			//stopwatch.Stop();
-			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
-			//stopwatch = Stopwatch.StartNew();
-			//RunCPU(l);
-			//stopwatch.Stop();
-			//Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
-
 			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(5, 5, 5, 25, 25, 25)), DiscreteBounds.OfSize(40, 40, 40));
-
-			//var voxelSpaceConbiner = new VoxelSpaceCombiner(40, 40, 40);
-			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(0, 0, 0));
-			//voxelSpaceConbiner.Add(voxelizedBunny, new Vector(40, 0, 0));
-
-			//voxelizedBunny = voxelSpaceConbiner.VoxelSpace;
+			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(10, 10, 10, 30, 30, 30)), DiscreteBounds.OfSize(40, 40, 40));
 
 			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
 
@@ -195,8 +159,6 @@ namespace LiquidConnections
 
 			gpuBunny = Gpu.Default.Allocate<VoxelCell>(40 * 40 * 40);
 			Gpu.Copy(flatBunny, gpuBunny);
-			
-			weightsMemory = Gpu.Default.AllocateDevice<float>(40 * 40 * 40);
 
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{
@@ -262,13 +224,13 @@ namespace LiquidConnections
 
 		static uint colorDataBuffer;
 		static float[] colorDataValues = {
-			1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f,
 			1.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
 			1.0f, 1.0f, 1.0f,
 		};
 
@@ -303,7 +265,6 @@ namespace LiquidConnections
 		static uint program;
 		static uint weightsBuffer;
 		static uint weightsTexture;
-		static DeviceMemory<float> weightsMemory;
 
 		static int iteration = 0;
 		static int fps = 0;
@@ -324,11 +285,6 @@ namespace LiquidConnections
 
 			Gl.UseProgram(program);
 
-			//Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
-			//Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
-
-			//Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
-
 			unsafe
 			{
 				IntPtr a;
@@ -341,31 +297,8 @@ namespace LiquidConnections
 				CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
 				CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
 			}
-			//Gl.UnmapBuffer(BufferTarget.TextureBuffer);
 
-			//Gl.BindBuffer(BufferTarget.ShaderStorageBuffer, weightsBuffer);
-			//Gl.BufferData(BufferTarget.ShaderStorageBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicCopy);
-
-			//foreach (var coordinates in DiscreteBounds.Of(voxelizedBunny))
 			{
-				//float distance = voxelizedBunny.At(coordinates).Distance;
-				//var normal = voxelizedBunny.At(coordinates).Normal.Normalize();
-				//float weight = distance < 1 ? 1f : distance < 2 ? 0.5f : 0f;
-				//float weight = distance < 1 ? 0.5f : 0f;
-
-				//if (weight <= 0)
-				//	continue;
-
-				//Gl.LoadIdentity();
-				//Gl.Translate(20 - coordinates.X, 20 - coordinates.Y, coordinates.Z - 80.0f);
-				//Gl.Scale(weight * 0.3f, weight * 0.3f, weight * 0.3f);
-				//Gl.MultMatrixf(LookAt(new Vertex3f(0, 0, 0), new Vertex3f(-normal.X, -normal.Y, -normal.Z), new Vertex3f(0, 1, 0)));
-				//Gl.Rotate(0, normal.X, normal.Y, normal.Z);
-
-				//Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 40 * 40 * 40, weights, BufferUsage.DynamicDraw);
-				//var loc = Gl.GetProgramResourceIndex(program, ProgramInterface.ShaderStorageBlock, "shader_data");
-				//Gl.BindBufferRange(BufferTarget.ShaderStorageBuffer, 2, weightsBuffer, IntPtr.Zero, 40*40*40*sizeof(float));
-
 				float n = 1f;
 				float f = 10000f;
 				float r = 0.3f;
@@ -378,20 +311,19 @@ namespace LiquidConnections
 					0, 0, -1, 0
 					);
 
-				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.001) * 0.8f, -0.8f, (float)Math.Cos(iteration * 0.001) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.01) * 0.8f, -(float)Math.Sin(iteration * 0.003) * 0.6f, (float)Math.Cos(iteration * 0.01) * 0.8f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
 				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
 
 				Gl.ActiveTexture(TextureUnit.Texture1);
 				Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
-				Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.R32f, weightsBuffer);
+				Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, weightsBuffer);
 				Gl.Uniform1i(Gl.GetUniformLocation(program, "weights"), 1, weightsTexture);
 
 
 				Gl.EnableVertexAttribArray(0);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
 				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
-				//Gl.DrawArrays(PrimitiveType.Triangles, 0, 12 * 3);
 
 				Gl.EnableVertexAttribArray(1);
 				Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
@@ -425,7 +357,7 @@ namespace LiquidConnections
 			Gl.Enable(EnableCap.Light0);
 			Gl.Enable(EnableCap.Lighting);
 
-			Gl.ClearColor(0.2f, 0.2f, 0.0f, 1.0f);
+			Gl.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			Gl.ClearDepth(1.0f);
 			Gl.Enable(EnableCap.DepthTest);
 			Gl.DepthFunc(DepthFunction.Lequal);
@@ -449,7 +381,7 @@ namespace LiquidConnections
 			weightsTexture = Gl.GenTexture();
 
 			Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
-			Gl.BufferData(BufferTarget.TextureBuffer, sizeof(float) * 40 * 40 * 40, null, BufferUsage.DynamicDraw);
+			Gl.BufferData(BufferTarget.TextureBuffer, (uint)Marshal.SizeOf<VoxelFace>() * 40 * 40 * 40, null, BufferUsage.DynamicDraw);
 
 			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
 			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });

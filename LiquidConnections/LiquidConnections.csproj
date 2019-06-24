@@ -96,11 +96,15 @@
     <Compile Include="VoxelSpace\DiscreteCoordinates.cs" />
     <Compile Include="VoxelSpace\DiscreteEdge.cs" />
     <Compile Include="VoxelSpace\VoxelCell.cs" />
+    <Compile Include="VoxelSpace\VoxelFace.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceBuilder.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceCombiner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Examples\ball.stl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Examples\bunny.stl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
