@@ -1,6 +1,7 @@
 ﻿using Alea;
 using Alea.CSharp;
 using LiquidConnections.Geometry;
+using LiquidConnections.Models;
 using LiquidConnections.Shapes;
 using LiquidConnections.Stl;
 using LiquidConnections.VoxelSpace;
@@ -104,8 +105,8 @@ namespace LiquidConnections
 				ref var cell2 = ref shape[bounds.Index(coordinates2)];
 				var distance2 = Vector.Between(coordinates2.AsVertex(), cell2.NearestIntersection).Length;
 
-				var weight1 = Math.Max(0f, 1f - distance1 / 2);
-				var weight2 = Math.Max(0f, 1f - distance2 / 2);
+				var weight1 = Math.Max(0f, 1f - distance1 );
+				var weight2 = Math.Max(0f, 1f - distance2 );
 
 				weightsBauffer.Set(i, new VoxelFace
 				{
@@ -151,7 +152,7 @@ namespace LiquidConnections
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(10, 10, 10, 30, 30, 30)), DiscreteBounds.OfSize(40, 40, 40));
+			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(15, 15, 15, 25, 25, 25)), DiscreteBounds.OfSize(40, 40, 40));
 
 			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
 
@@ -193,80 +194,7 @@ namespace LiquidConnections
 			Gl.LoadMatrixf(perspective);
 		}
 
-		static Matrix4x4f LookAt(in Vertex3f eye, in Vertex3f target, in Vertex3f upDir)
-		{
-			// compute the forward vector from target to eye
-			Vertex3f forward = eye - target;
-			forward.Normalize();                 // make unit length
-
-			// compute the left vector
-			Vertex3f left = upDir ^ forward; // cross product
-			left.Normalize();
-
-			// recompute the orthonormal up vector
-			Vertex3f up = forward ^ left;    // cross product
-
-			// init 4x4 matrix
-			Matrix4x4f matrix = Matrix4x4f.Identity;
-
-			// set rotation part, inverse rotation matrix: M^-1 = M^T for Euclidean transform
-			matrix[0, 0] = left.x;
-			matrix[1, 0] = left.y;
-			matrix[2, 0] = left.z;
-			matrix[0, 1] = up.x;
-			matrix[1, 1] = up.y;
-			matrix[2, 1] = up.z;
-			matrix[0, 2] = forward.x;
-			matrix[1, 2] = forward.y;
-			matrix[2, 2] = forward.z;
-
-			// set translation part
-			matrix[3, 0] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
-			matrix[3, 1] = -up.x * eye.x - up.y * eye.y - up.z * eye.z;
-			matrix[3, 2] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
-
-			return matrix;
-		}
-
-		static uint colorDataBuffer;
-		static float[] colorDataValues = {
-			0.3f, 0.1f, 0.1f,
-			0.3f, 0.1f, 0.1f,
-			0.3f, 0.1f, 0.1f,
-			0.3f, 0.1f, 0.1f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-		};
-
-		static uint vertexDataBuffer;
-		static float[] vertexDataValues = {
-			-1.0f, -1.0f, +1.0f,
-			+1.0f, -1.0f, +1.0f,
-			+1.0f, +1.0f, +1.0f,
-			-1.0f, +1.0f, +1.0f,
-			-1.0f, -1.0f, -1.0f,
-			+1.0f, -1.0f, -1.0f,
-			+1.0f, +1.0f, -1.0f,
-			-1.0f, +1.0f, -1.0f
-		};
-
-		static uint indexDataBuffer;
-		static ushort[] indexDataValues = {
-			0, 1, 2,
-			2, 3, 0,
-			1, 5, 6,
-			6, 2, 1,
-			7, 6, 5,
-			5, 4, 7,
-			4, 0, 3,
-			3, 7, 4,
-			4, 5, 1,
-			1, 0, 4,
-			3, 2, 6,
-			6, 7, 3
-		};
+		static Box box;
 
 		static uint program;
 		static uint weightsBuffer;
@@ -317,7 +245,7 @@ namespace LiquidConnections
 					0, 0, -1, 0
 					);
 
-				transformation = transformation * LookAt(new Vertex3f((float)Math.Sin(iteration * 0.000001) * 1f, -(float)Math.Sin(iteration * 0.003) * 0.6f, (float)Math.Cos(iteration * 0.000001) * 1f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+				transformation = transformation * Matrix4x4f.LookAt(new Vertex3f((float)Math.Sin(iteration * 0.000001) * 1f, -(float)Math.Sin(iteration * 0.003) * 0.6f, (float)Math.Cos(iteration * 0.000001) * 1f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
 				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
 
@@ -326,20 +254,10 @@ namespace LiquidConnections
 				Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, weightsBuffer);
 				Gl.Uniform1i(Gl.GetUniformLocation(program, "weights"), 1, weightsTexture);
 
-
-				Gl.EnableVertexAttribArray(0);
-				Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
-				Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
-
-				Gl.EnableVertexAttribArray(1);
-				Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
-				Gl.VertexAttribPointer(1, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
-
-				Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
-
-				Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 40 * 40 * 40);
-				Gl.DisableVertexAttribArray(0);
-				Gl.DisableVertexAttribArray(1);
+				using (var boxContext = box.Bind())
+				{
+					Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 40 * 40 * 40);
+				}
 
 			}
 
@@ -374,17 +292,7 @@ namespace LiquidConnections
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			Gl.Enable(EnableCap.Normalize);
 
-			vertexDataBuffer = Gl.GenBuffer();
-			Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
-			Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (uint)vertexDataValues.Length, vertexDataValues, BufferUsage.StaticDraw);
-
-			colorDataBuffer = Gl.GenBuffer();
-			Gl.BindBuffer(BufferTarget.ArrayBuffer, colorDataBuffer);
-			Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (uint)colorDataValues.Length, colorDataValues, BufferUsage.StaticDraw);
-
-			indexDataBuffer = Gl.GenBuffer();
-			Gl.BindBuffer(BufferTarget.ElementArrayBuffer, indexDataBuffer);
-			Gl.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * (uint)indexDataValues.Length, indexDataValues, BufferUsage.StaticDraw);
+			box = new Box();
 
 			weightsBuffer = Gl.GenBuffer();
 			weightsTexture = Gl.GenTexture();
