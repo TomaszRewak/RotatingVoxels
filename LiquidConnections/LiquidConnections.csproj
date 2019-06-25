@@ -87,11 +87,12 @@
     <Compile Include="Geometry\Ray.cs" />
     <Compile Include="Geometry\Vector.cs" />
     <Compile Include="Geometry\Vertex.cs" />
-    <Compile Include="Models\Box.cs" />
-    <Compile Include="Models\IModel.cs" />
+    <Compile Include="Resources\Models\Box.cs" />
+    <Compile Include="Resources\Models\IModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Geometry\Bounds.cs" />
+    <Compile Include="Resources\Shaders\ShadingProgram.cs" />
     <Compile Include="Shapes\ShapeNormalizer.cs" />
     <Compile Include="Stl\StlReader.cs" />
     <Compile Include="VoxelSpace\DiscreteBounds.cs" />

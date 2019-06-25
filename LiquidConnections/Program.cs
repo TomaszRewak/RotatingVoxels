@@ -1,7 +1,9 @@
 ﻿using Alea;
 using Alea.CSharp;
 using LiquidConnections.Geometry;
-using LiquidConnections.Models;
+using LiquidConnections.Resources;
+using LiquidConnections.Resources.Models;
+using LiquidConnections.Resources.Shaders;
 using LiquidConnections.Shapes;
 using LiquidConnections.Stl;
 using LiquidConnections.VoxelSpace;
@@ -194,9 +196,9 @@ namespace LiquidConnections
 			Gl.LoadMatrixf(perspective);
 		}
 
-		static Box box;
+		static IModel model;
+		static ShadingProgram program;
 
-		static uint program;
 		static uint weightsBuffer;
 		static uint weightsTexture;
 
@@ -217,51 +219,32 @@ namespace LiquidConnections
 
 			Gl.MatrixMode(MatrixMode.Modelview);
 
-			Gl.UseProgram(program);
-
-			unsafe
+			using(program.Use())
 			{
-				IntPtr a;
-				IntPtr b;
-				CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
-				CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
-				Clear(a);
-				CopyToTexture(a, iteration * 0.1f);
-				Gpu.Default.Synchronize();
-				CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
-				CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
-			}
-
-			{
-				float n = 1f;
-				float f = 10000f;
-				float r = 0.3f;
-				float t = 0.3f;
-
-				Matrix4x4f transformation = new Matrix4x4f(
-					n / r, 0, 0, 0,
-					0, n / t, 0, 0,
-					0, 0, -(f + n) / (f - n), -2 * f * n / (f - n),
-					0, 0, -1, 0
-					);
-
-				transformation = transformation * Matrix4x4f.LookAt(new Vertex3f((float)Math.Sin(iteration * 0.000001) * 1f, -(float)Math.Sin(iteration * 0.003) * 0.6f, (float)Math.Cos(iteration * 0.000001) * 1f), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
-
-				Gl.UniformMatrix4f(Gl.GetUniformLocation(program, "transformation"), 1, false, transformation);
-
-				Gl.ActiveTexture(TextureUnit.Texture1);
-				Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
-				Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, weightsBuffer);
-				Gl.Uniform1i(Gl.GetUniformLocation(program, "weights"), 1, weightsTexture);
-
-				using (var boxContext = box.Bind())
+				unsafe
 				{
-					Gl.DrawElementsInstanced(PrimitiveType.Triangles, 12 * 3, DrawElementsType.UnsignedShort, IntPtr.Zero, 40 * 40 * 40);
+					IntPtr a;
+					IntPtr b;
+					CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
+					CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
+					Clear(a);
+					CopyToTexture(a, iteration * 0.1f);
+					Gpu.Default.Synchronize();
+					CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
+					CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
 				}
 
-			}
+				{
+					program.Transformation = Matrix4x4f.Perspective(45, 1, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0, 0, -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
-			Gl.UseProgram(0);
+					Gl.ActiveTexture(TextureUnit.Texture1);
+					Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
+					Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, weightsBuffer);
+					program.Weights = weightsTexture;
+
+					model.Draw(40 * 40 * 40);
+				}
+			}
 
 			Gl.LoadIdentity();
 
@@ -292,7 +275,7 @@ namespace LiquidConnections
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			Gl.Enable(EnableCap.Normalize);
 
-			box = new Box();
+			model = new Box();
 
 			weightsBuffer = Gl.GenBuffer();
 			weightsTexture = Gl.GenTexture();
@@ -300,46 +283,7 @@ namespace LiquidConnections
 			Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
 			Gl.BufferData(BufferTarget.TextureBuffer, (uint)Marshal.SizeOf<VoxelFace>() * 40 * 40 * 40, null, BufferUsage.DynamicDraw);
 
-			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
-			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });
-			Gl.CompileShader(vertexShader);
-
-			Gl.GetShader(vertexShader, ShaderParameterName.CompileStatus, out var success1);
-			if (success1 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				Gl.GetShaderInfoLog(vertexShader, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
-
-			var fragmentShader = Gl.CreateShader(ShaderType.FragmentShader);
-			Gl.ShaderSource(fragmentShader, new[] { File.ReadAllText("./Shaders/InstanceShader.fs") });
-			Gl.CompileShader(fragmentShader);
-
-			Gl.GetShader(fragmentShader, ShaderParameterName.CompileStatus, out var success2);
-			if (success2 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				Gl.GetShaderInfoLog(fragmentShader, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
-
-			program = Gl.CreateProgram();
-			Gl.AttachShader(program, vertexShader);
-			Gl.AttachShader(program, fragmentShader);
-			Gl.LinkProgram(program);
-
-			Gl.GetProgram(program, ProgramProperty.LinkStatus, out var success3);
-			if (success3 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				var error = Gl.GetError();
-				Gl.GetProgramInfoLog(program, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
+			program = new ShadingProgram();
 
 			stopwatch.Start();
 		}

@@ -5,10 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiquidConnections.Models
+namespace LiquidConnections.Resources.Models
 {
 	class Box : IModel
 	{
+		private struct BoxContext : IDisposable
+		{
+			public void Dispose()
+			{
+				Gl.DisableVertexAttribArray(0);
+				Gl.DisableVertexAttribArray(1);
+			}
+		}
+
 		private uint colorDataBuffer;
 		private static float[] colorDataValues = {
 			0.3f, 0.1f, 0.1f,
@@ -71,7 +80,7 @@ namespace LiquidConnections.Models
 			Gl.DeleteBuffers(indexDataBuffer);
 		}
 
-		public IDisposable Bind()
+		private IDisposable Bind()
 		{
 			Gl.EnableVertexAttribArray(0);
 			Gl.BindBuffer(BufferTarget.ArrayBuffer, vertexDataBuffer);
@@ -85,14 +94,11 @@ namespace LiquidConnections.Models
 
 			return new BoxContext();
 		}
-	}
 
-	struct BoxContext : IDisposable
-	{
-		public void Dispose()
+		public void Draw(int times)
 		{
-			Gl.DisableVertexAttribArray(0);
-			Gl.DisableVertexAttribArray(1);
+			using (Bind())
+				Gl.DrawElementsInstanced(PrimitiveType.Triangles, indexDataValues.Length, DrawElementsType.UnsignedShort, IntPtr.Zero, times);
 		}
 	}
 }

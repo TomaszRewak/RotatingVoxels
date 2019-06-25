@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiquidConnections.Models
+namespace LiquidConnections.Resources.Models
 {
 	interface IModel : IDisposable
 	{
-		IDisposable Bind();
+		void Draw(int times);
 	}
 }
