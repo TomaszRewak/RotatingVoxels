@@ -14,46 +14,16 @@ namespace LiquidConnections.Resources.Shaders
 
 		public ShadingProgram()
 		{
-			var vertexShader = Gl.CreateShader(ShaderType.VertexShader);
-			Gl.ShaderSource(vertexShader, new[] { File.ReadAllText("./Shaders/InstanceShader.vs") });
-			Gl.CompileShader(vertexShader);
-
-			Gl.GetShader(vertexShader, ShaderParameterName.CompileStatus, out var success1);
-			if (success1 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				Gl.GetShaderInfoLog(vertexShader, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
-
-			var fragmentShader = Gl.CreateShader(ShaderType.FragmentShader);
-			Gl.ShaderSource(fragmentShader, new[] { File.ReadAllText("./Shaders/InstanceShader.fs") });
-			Gl.CompileShader(fragmentShader);
-
-			Gl.GetShader(fragmentShader, ShaderParameterName.CompileStatus, out var success2);
-			if (success2 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				Gl.GetShaderInfoLog(fragmentShader, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
-
 			_program = Gl.CreateProgram();
-			Gl.AttachShader(_program, vertexShader);
-			Gl.AttachShader(_program, fragmentShader);
+
+			var vertexShader = new Shader(ShaderType.VertexShader, "./Shaders/InstanceShader.vs");
+			var fragmentShader = new Shader(ShaderType.FragmentShader, "./Shaders/InstanceShader.fs");
+
+			Gl.AttachShader(_program, vertexShader.GlShader);
+			Gl.AttachShader(_program, fragmentShader.GlShader);
 			Gl.LinkProgram(_program);
 
-			Gl.GetProgram(_program, ProgramProperty.LinkStatus, out var success3);
-			if (success3 == 0)
-			{
-				StringBuilder infoLog = new StringBuilder(1024);
-				var error = Gl.GetError();
-				Gl.GetProgramInfoLog(_program, 1024, out int _, infoLog);
-				Console.WriteLine("Errors: \n{0}", infoLog);
-				throw new InvalidProgramException();
-			}
+			Validate();
 		}
 
 		public IDisposable Use()
@@ -71,6 +41,26 @@ namespace LiquidConnections.Resources.Shaders
 		public uint Weights
 		{
 			set => Gl.Uniform1i(Gl.GetUniformLocation(_program, "weights"), 1, value);
+		}
+
+		private void Validate()
+		{
+			Gl.GetProgram(_program, ProgramProperty.LinkStatus, out var success);
+
+			if (success != 0)
+				return;
+
+			LogError();
+			
+			throw new InvalidProgramException();
+		}
+
+		private void LogError()
+		{
+			StringBuilder infoLog = new StringBuilder(1024);
+			var error = Gl.GetError();
+			Gl.GetProgramInfoLog(_program, 1024, out int _, infoLog);
+			Console.WriteLine("Errors: \n{0}", infoLog);
 		}
 
 		struct ProgramContext : IDisposable

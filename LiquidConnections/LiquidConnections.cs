@@ -28,7 +28,7 @@ namespace LiquidConnections
 		public int B;
 	}
 
-	static class Program
+	static class LiquidConnections
 	{
 		private static int Add(in TestType a, in TestType b)
 		{
