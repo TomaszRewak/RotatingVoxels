@@ -107,8 +107,8 @@ namespace LiquidConnections
 				ref var cell2 = ref shape[bounds.Index(coordinates2)];
 				var distance2 = Vector.Between(coordinates2.AsVertex(), cell2.NearestIntersection).Length;
 
-				var weight1 = Math.Max(0f, 1f - distance1 );
-				var weight2 = Math.Max(0f, 1f - distance2 );
+				var weight1 = Math.Max(0f, 1f - distance1 / 2);
+				var weight2 = Math.Max(0f, 1f - distance2 / 2);
 
 				weightsBauffer.Set(i, new VoxelFace
 				{
@@ -150,11 +150,11 @@ namespace LiquidConnections
 
 		static void Main(string[] args)
 		{
-			bunny = StlReader.LoadShape("./Examples/ball.stl");
+			bunny = StlReader.LoadShape("./Examples/bunny.stl");
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(15, 15, 15, 25, 25, 25)), DiscreteBounds.OfSize(40, 40, 40));
+			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(5, 5, 5, 35, 35, 35)), DiscreteBounds.OfSize(40, 40, 40));
 
 			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
 
@@ -235,7 +235,7 @@ namespace LiquidConnections
 				}
 
 				{
-					program.Transformation = Matrix4x4f.Perspective(45, 1, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0, 0, -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+					program.Transformation = Matrix4x4f.Perspective(60, 1, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f, -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
 					Gl.ActiveTexture(TextureUnit.Texture1);
 					Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
@@ -263,9 +263,6 @@ namespace LiquidConnections
 
 			Gl.Enable(EnableCap.Light0);
 			Gl.Enable(EnableCap.Lighting);
-
-			Gl.Enable(EnableCap.Multisample);
-			Gl.Enable(EnableCap.Blend);
 
 			Gl.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			Gl.ClearDepth(1.0f);

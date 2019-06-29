@@ -7,12 +7,14 @@ uniform samplerBuffer weights;
 uniform mat4 transformation;
 
 out vec3 fColor;
+out vec3 fPos;
+out float fWeight;
 
 mat4 lookAt(inout vec3 target)
 {
 	vec3 forward = normalize(target);
 	vec3 left = normalize(cross(vec3(0, 1, 0), forward));
-	vec3 up = normalize(cross(forward, left));    // cross product
+	vec3 up = cross(forward, left);
 
 	mat4 matrix = mat4(1.0f);
 
@@ -34,12 +36,15 @@ void main()
 	vec4 texel = texelFetch(weights, gl_InstanceID);
 
 	float weight = texel.r;
-	vec3 normal = vec3(texel.g, texel.b, texel.a);
+	vec3 normal = -vec3(texel.g, texel.b, texel.a);
 
 	vec4 coordinates = vec4(gl_InstanceID % 40 - 20, gl_InstanceID / 40 % 40 - 20, gl_InstanceID / 40 / 40 % 40 - 20, 20);
 	mat4 direction = lookAt(normal);
 	vec4 cornerPos = vec4(aPos * weight * 0.3, 20);
 
-    gl_Position = transformation * (direction * cornerPos + coordinates);
+    gl_Position = transformation * (coordinates + direction * cornerPos);
+	
     fColor = aColor;
+	fPos = aPos;
+	fWeight = weight;
 } 
