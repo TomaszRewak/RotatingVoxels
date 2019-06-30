@@ -13,6 +13,7 @@ using System;
 using System.Diagnostics;
 using RotatingVoxels.Cuda;
 using RotatingVoxels.Window;
+using RotatingVoxels.Scene;
 
 namespace RotatingVoxels
 {
@@ -29,9 +30,7 @@ namespace RotatingVoxels
 
 		static void Main(string[] args)
 		{
-			var stlShape = StlReader.LoadShape("./Examples/bunny.stl");
-			var voxelizedShape = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(stlShape, new Bounds(5, 5, 5, 35, 35, 35)), DiscreteBounds.OfSize(40, 40, 40));
-			gpuShape = new GpuShape(voxelizedShape);
+			gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(40, 40, 40), 5);
 
 			using (window = NativeWindow.Create())
 			{

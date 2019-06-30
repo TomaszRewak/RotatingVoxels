@@ -13,6 +13,8 @@ namespace RotatingVoxels.Window
 
 		private int _fps;
 
+		public float Fps { get; private set; }
+
 		public void Start()
 		{
 			_stopwatch.Start();
@@ -24,16 +26,11 @@ namespace RotatingVoxels.Window
 
 			if (_stopwatch.ElapsedMilliseconds >= 1000)
 			{
-				Log();
+				Fps = _fps * 1000f / _stopwatch.ElapsedMilliseconds;
 
 				_stopwatch.Restart();
 				_fps = 0;
 			}
-		}
-
-		private void Log()
-		{
-			Console.WriteLine(_fps * 1000f / _stopwatch.ElapsedMilliseconds);
 		}
 	}
 }

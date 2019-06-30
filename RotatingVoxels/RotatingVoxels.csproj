@@ -97,6 +97,7 @@
     <Compile Include="Geometry\Bounds.cs" />
     <Compile Include="Resources\Shaders\ShadingProgram.cs" />
     <Compile Include="Resources\Shaders\Shader.cs" />
+    <Compile Include="Scene\ShapeLoader.cs" />
     <Compile Include="Shapes\ShapeNormalizer.cs" />
     <Compile Include="Stl\StlReader.cs" />
     <Compile Include="VoxelSpace\DiscreteBounds.cs" />
