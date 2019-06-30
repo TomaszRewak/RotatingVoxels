@@ -10,14 +10,7 @@ using RotatingVoxels.VoxelSpace;
 using OpenGL;
 using OpenGL.CoreUI;
 using System;
-//using OpenGL;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using RotatingVoxels.Cuda;
 
 namespace RotatingVoxels
@@ -30,53 +23,6 @@ namespace RotatingVoxels
 
 	static class RotatingVoxels
 	{
-		private static int Add(in TestType a, in TestType b)
-		{
-			return a.A + b.B;
-		}
-
-		private static void Kernel(int[] result, TestType[] arg1, TestType[] arg2)
-		{
-			var start = blockIdx.x * blockDim.x + threadIdx.x;
-			var stride = gridDim.x * blockDim.x;
-
-			for (var i = start; i < result.Length; i += stride)
-				for (int j = 0; j < arg1.Length; j++)
-					result[i] = Add(arg1[i], arg2[j]);
-		}
-
-		[GpuManaged]
-		public static int[] Run(int length)
-		{
-			var gpu = Gpu.Default;
-			var lp = new LaunchParam(16, 256);
-			var arg1 = Enumerable.Range(0, length).Select(e => new TestType { A = e, B = e }).ToArray();
-			var arg2 = Enumerable.Range(0, length).Select(e => new TestType { A = e, B = e }).ToArray();
-			var result = new int[length];
-
-			gpu.Launch(Kernel, lp, result, arg1, arg2);
-
-			return result;
-		}
-
-		private static void KernelCPU(int[] result, int[] arg1, int[] arg2)
-		{
-			for (var i = 0; i < result.Length; i++)
-				for (int j = 0; j < arg1.Length; j++)
-					result[i] = arg1[i] + arg2[j];
-		}
-
-		public static int[] RunCPU(int length)
-		{
-			var arg1 = Enumerable.Range(0, length).ToArray();
-			var arg2 = Enumerable.Range(0, length).ToArray();
-			var result = new int[length];
-
-			KernelCPU(result, arg1, arg2);
-
-			return result;
-		}
-
 		static VoxelCell[,,] voxelizedBunny;
 		static Face[] bunny;
 		static GpuShape gpuBunny;
