@@ -18,7 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using RotatingVoxels.Cuda;
 
 namespace RotatingVoxels
 {
@@ -77,76 +77,10 @@ namespace RotatingVoxels
 			return result;
 		}
 
-		private static void BunnyKernel(deviceptr<VoxelFace> weightsBauffer, VoxelCell[] shape, float xOffset)
-		{
-			var length = 40 * 40 * 40;
-			var start = length * (threadIdx.x) / blockDim.x;
-			var end = length * (threadIdx.x + 1) / blockDim.x;
-			int offset = (int)Math.Floor(xOffset);
-
-			//weightsBauffer.Set(0, 0.5f);
-
-			//for (int i = 0; i < gpuBunny.Length; i++)
-			//	texture.Set(i, bunnyFloat[i]);
-
-			for (int i = start; i < end; i++)
-			{
-				int x = i % 40 + offset;
-				int y = i / 40 % 40;
-				int z = i / 40 / 40 % 40;
-
-				var coordinates1 = DiscreteCoordinates.At( x      % 40, y, z);
-				var coordinates2 = DiscreteCoordinates.At((x + 1) % 40, y, z);
-				var bounds = DiscreteBounds.OfSize(40, 40, 40);
-
-				xOffset = xOffset - (float)Math.Floor(xOffset);
-
-				ref var cell1 = ref shape[bounds.Index(coordinates1)];
-				var distance1 = Vector.Between(coordinates1.AsVertex(), cell1.NearestIntersection).Length;
-
-				ref var cell2 = ref shape[bounds.Index(coordinates2)];
-				var distance2 = Vector.Between(coordinates2.AsVertex(), cell2.NearestIntersection).Length;
-
-				var weight1 = Math.Max(0f, 1f - distance1 / 2);
-				var weight2 = Math.Max(0f, 1f - distance2 / 2);
-
-				weightsBauffer.Set(i, new VoxelFace
-				{
-					Weight = weight1 * (1 - xOffset) + weight2 * xOffset,
-					Normal = cell1.Normal * (1 - xOffset) + cell2.Normal * xOffset
-				});
-			}
-
-		}
-
-		private static void CopyToTexture(IntPtr ptr, float xOffset)
-		{
-			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(BunnyKernel, lp, new deviceptr<VoxelFace>(ptr), gpuBunny, xOffset * 0.2f);
-		}
-
-		private static void Clear(deviceptr<VoxelFace> weightsBauffer)
-		{
-			var length = 40 * 40 * 40;
-			var start = length * (threadIdx.x) / blockDim.x;
-			var end = length * (threadIdx.x + 1) / blockDim.x;
-
-			for (int i = start; i < end; i++)
-				weightsBauffer.Set(i, new VoxelFace { Weight = 0 });
-
-		}
-
-		private static void Clear(IntPtr ptr)
-		{
-			var lp = new LaunchParam(1, 256);
-			Gpu.Default.Launch(Clear, lp, new deviceptr<VoxelFace>(ptr));
-		}
-
 		static VoxelCell[,,] voxelizedBunny;
 		static Face[] bunny;
-		static float[] bunnyFloat;
-		static VoxelCell[] gpuBunny;
-		static VoxelCell[] gpuCombined;
+		static GpuShape gpuBunny;
+		static GpuSpace gpuSpace;
 
 		static void Main(string[] args)
 		{
@@ -156,18 +90,10 @@ namespace RotatingVoxels
 
 			voxelizedBunny = VoxelSpaceBuilder.Build(ShapeNormalizer.NormalizeShape(bunny, new Bounds(5, 5, 5, 35, 35, 35)), DiscreteBounds.OfSize(40, 40, 40));
 
-			bunnyFloat = MemoryMarshal.Cast<Face, float>(bunny).ToArray();
-
 			stopwatch.Stop();
 			Console.WriteLine($"Pricessing took: {stopwatch.ElapsedMilliseconds}ms");
 
-			var bounds = DiscreteBounds.Of(voxelizedBunny);
-			var flatBunny = new VoxelCell[bounds.Length];
-			foreach (var coordinates in bounds)
-				flatBunny[bounds.Index(coordinates)] = voxelizedBunny.At(coordinates);
-
-			gpuBunny = Gpu.Default.Allocate<VoxelCell>(40 * 40 * 40);
-			Gpu.Copy(flatBunny, gpuBunny);
+			gpuBunny = new GpuShape(voxelizedBunny);
 
 			using (NativeWindow nativeWindow = NativeWindow.Create())
 			{
@@ -199,9 +125,6 @@ namespace RotatingVoxels
 		static IModel model;
 		static ShadingProgram program;
 
-		static uint weightsBuffer;
-		static uint weightsTexture;
-
 		static int iteration = 0;
 		static int fps = 0;
 		static Stopwatch stopwatch = new Stopwatch();
@@ -221,26 +144,16 @@ namespace RotatingVoxels
 
 			using(program.Use())
 			{
-				unsafe
+				using (var context = gpuSpace.UseBuffer())
 				{
-					IntPtr a;
-					IntPtr b;
-					CUDAInterop.cuGLRegisterBufferObject(weightsBuffer);
-					CUDAInterop.cuSafeCall(CUDAInterop.cuGLMapBufferObject(&a, &b, weightsBuffer));
-					Clear(a);
-					CopyToTexture(a, iteration * 0.1f);
-					Gpu.Default.Synchronize();
-					CUDAInterop.cuGLUnmapBufferObject(weightsBuffer);
-					CUDAInterop.cuGLUnregisterBufferObject(weightsBuffer);
+					VoxelKernel.Clear(context.Space);
+					VoxelKernel.Sample(gpuBunny.Shape, context.Space, iteration * .1f);
 				}
 
+				using (var context = gpuSpace.UseTexture())
 				{
 					program.Transformation = Matrix4x4f.Perspective(60, 1, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
-
-					Gl.ActiveTexture(TextureUnit.Texture1);
-					Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, weightsTexture);
-					Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, weightsBuffer);
-					program.Weights = weightsTexture;
+					program.Weights = context.Texture;
 
 					model.Draw(40 * 40 * 40);
 				}
@@ -272,13 +185,12 @@ namespace RotatingVoxels
 			Gl.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			Gl.Enable(EnableCap.Normalize);
 
+			Gl.Enable(EnableCap.CullFace);
+			Gl.CullFace(CullFaceMode.Back);
+			Gl.FrontFace(FrontFaceDirection.Ccw);
+
 			model = new Box();
-
-			weightsBuffer = Gl.GenBuffer();
-			weightsTexture = Gl.GenTexture();
-
-			Gl.BindBuffer(BufferTarget.TextureBuffer, weightsBuffer);
-			Gl.BufferData(BufferTarget.TextureBuffer, (uint)Marshal.SizeOf<VoxelFace>() * 40 * 40 * 40, null, BufferUsage.DynamicDraw);
+			gpuSpace = new GpuSpace(DiscreteBounds.OfSize(40, 40, 40));
 
 			program = new ShadingProgram();
 

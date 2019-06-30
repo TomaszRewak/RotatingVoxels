@@ -18,7 +18,7 @@ namespace RotatingVoxels.VoxelSpace
 		public int MaxY;
 		public int MaxZ;
 
-		public static DiscreteBounds OfSize(int maxX, int maxY, int maxZ)
+		public static DiscreteBounds OfSize(int width, int height, int depth)
 		{
 			return new DiscreteBounds
 			{
@@ -26,9 +26,9 @@ namespace RotatingVoxels.VoxelSpace
 				MinY = 0,
 				MinZ = 0,
 
-				MaxX = maxX,
-				MaxY = maxY,
-				MaxZ = maxZ
+				MaxX = width - 1,
+				MaxY = height - 1,
+				MaxZ = depth - 1
 			};
 		}
 

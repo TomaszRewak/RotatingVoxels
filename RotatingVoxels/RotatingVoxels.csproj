@@ -82,6 +82,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cuda\GpuShape.cs" />
+    <Compile Include="Cuda\GpuSpace.cs" />
+    <Compile Include="Cuda\VoxelKernel.cs" />
     <Compile Include="Geometry\Face.cs" />
     <Compile Include="Geometry\FaceVertex.cs" />
     <Compile Include="Geometry\Ray.cs" />
