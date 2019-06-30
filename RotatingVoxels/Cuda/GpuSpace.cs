@@ -20,13 +20,15 @@ namespace RotatingVoxels.Cuda
 	{
 		private readonly uint _buffer;
 		private readonly uint _texture;
-		private readonly DiscreteBounds _bounds;
+
+		public DiscreteBounds Bounds { get; }
 
 		public GpuSpace(DiscreteBounds bounds)
 		{
 			_buffer = Gl.GenBuffer();
 			_texture = Gl.GenTexture();
-			_bounds = bounds;
+
+			Bounds = bounds;
 
 			Gl.BindBuffer(BufferTarget.TextureBuffer, _buffer);
 			Gl.BufferData(BufferTarget.TextureBuffer, (uint)Marshal.SizeOf<VoxelFace>() * (uint)bounds.Length, null, BufferUsage.DynamicDraw);
@@ -34,7 +36,7 @@ namespace RotatingVoxels.Cuda
 
 		public GpuSpaceBufferContext UseBuffer()
 		{
-			return new GpuSpaceBufferContext(_buffer, _bounds);
+			return new GpuSpaceBufferContext(_buffer, Bounds);
 		}
 
 		public GpuSpaceTextureContext UseTexture()
@@ -80,18 +82,17 @@ namespace RotatingVoxels.Cuda
 
 	class GpuSpaceTextureContext : IDisposable
 	{
-		private readonly uint _texture;
 		private readonly uint _buffer;
 
-		public uint Texture => _texture;
+		public uint Texture { get; }
 
 		public GpuSpaceTextureContext(uint texture, uint buffer)
 		{
-			_texture = texture;
+			Texture = texture;
 			_buffer = buffer;
 
 			Gl.ActiveTexture(TextureUnit.Texture1);
-			Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, _texture);
+			Gl.BindTexture((TextureTarget)Gl.TEXTURE_BUFFER, Texture);
 			Gl.TexBuffer((TextureTarget)Gl.TEXTURE_BUFFER, InternalFormat.Rgba32f, _buffer);
 		}
 

@@ -106,6 +106,7 @@
     <Compile Include="VoxelSpace\VoxelFace.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceBuilder.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceCombiner.cs" />
+    <Compile Include="Window\FpsCounter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
