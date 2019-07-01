@@ -123,6 +123,16 @@ namespace RotatingVoxels.VoxelSpace
 			return coordinates.X + coordinates.Y * width + coordinates.Z * width * height;
 		}
 
+		public DiscreteCoordinates Warp(in DiscreteCoordinates coordinates)
+		{
+			return new DiscreteCoordinates
+			{
+				X = (coordinates.X - coordinates.X / Width * Width + Width) % Width,
+				Y = (coordinates.Y - coordinates.Y / Height * Height + Height) % Height,
+				Z = (coordinates.Z - coordinates.Z / Depth * Depth + Depth) % Depth
+			};
+		}
+
 		public IEnumerator<DiscreteCoordinates> GetEnumerator()
 		{
 			for (int x = MinX; x <= MaxX; x++)

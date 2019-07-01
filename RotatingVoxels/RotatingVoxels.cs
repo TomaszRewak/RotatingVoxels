@@ -34,11 +34,7 @@ namespace RotatingVoxels
 
 			using (window = NativeWindow.Create())
 			{
-				window.DepthBits = 24;
-				window.Create(100, 100, 1200, 800, NativeWindowStyle.None);
-				window.Show();
-				window.Render += Render;
-
+				InitializeWindow();
 				InitializeOpenGl();
 
 				callModel = new Box();
@@ -47,6 +43,7 @@ namespace RotatingVoxels
 
 				fpsCounter.Start();
 
+				window.Show();
 				window.Run();
 			}
 		}
@@ -62,8 +59,10 @@ namespace RotatingVoxels
 			{
 				using (var context = gpuSpace.UseBuffer())
 				{
+					var transformation = Matrix4x4f.Translated(iteration * 0.1f, 0, 0) * Matrix4x4f.RotatedZ(iteration * 0.1f);
+
 					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(gpuShape.Shape, context.Space, iteration * .1f);
+					VoxelKernel.Sample(gpuShape.Shape, context.Space, Matrix.From(transformation));
 				}
 
 				using (var context = gpuSpace.UseTexture())
@@ -76,6 +75,13 @@ namespace RotatingVoxels
 			}
 
 			iteration++;
+		}
+
+		private static void InitializeWindow()
+		{
+			window.DepthBits = 24;
+			window.Create(100, 100, 1200, 800, NativeWindowStyle.None);
+			window.Render += Render;
 		}
 
 		private static void InitializeOpenGl()

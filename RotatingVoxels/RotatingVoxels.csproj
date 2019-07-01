@@ -87,6 +87,7 @@
     <Compile Include="Cuda\VoxelKernel.cs" />
     <Compile Include="Geometry\Face.cs" />
     <Compile Include="Geometry\FaceVertex.cs" />
+    <Compile Include="Geometry\Matrix.cs" />
     <Compile Include="Geometry\Ray.cs" />
     <Compile Include="Geometry\Vector.cs" />
     <Compile Include="Geometry\Vertex.cs" />
@@ -106,7 +107,6 @@
     <Compile Include="VoxelSpace\VoxelCell.cs" />
     <Compile Include="VoxelSpace\VoxelFace.cs" />
     <Compile Include="VoxelSpace\VoxelSpaceBuilder.cs" />
-    <Compile Include="VoxelSpace\VoxelSpaceCombiner.cs" />
     <Compile Include="Window\FpsCounter.cs" />
   </ItemGroup>
   <ItemGroup>
