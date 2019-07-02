@@ -12,21 +12,22 @@ namespace RotatingVoxels.Cuda
 {
 	class VoxelKernel
 	{
-		private static LaunchParam _lunchParams = new LaunchParam(1, 256);
+		private static LaunchParam _lunchParams = new LaunchParam(8, 256);
 
 		public static void Sample(GpuShapeInfo shape, GpuSpaceInfo space, Matrix transformation)
 		{
 			Gpu.Default.Launch(SampleKernel, _lunchParams, shape, space, transformation);
+			Gpu.Default.Synchronize();
 		}
 
 		private static void SampleKernel(GpuShapeInfo shape, GpuSpaceInfo space, Matrix transformation)
 		{
-			var start = space.Bounds.Length * (threadIdx.x) / blockDim.x;
-			var end = space.Bounds.Length * (threadIdx.x + 1) / blockDim.x;
+			var start = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x) / blockDim.x / gridDim.x;
+			var end = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x + 1) / blockDim.x / gridDim.x;
 
 			for (int voxelIndex = start; voxelIndex < end; voxelIndex++)
 			{
-				var voxel = new VoxelFace();
+				var voxel = space.Voxels.Get(voxelIndex);
 
 				var spaceCoordinates = DiscreteCoordinates.At(voxelIndex % 40, voxelIndex / 40 % 40, voxelIndex / 40 / 40 % 40);
 				var spacePosition = spaceCoordinates.AsVertex();
@@ -41,10 +42,10 @@ namespace RotatingVoxels.Cuda
 					ref var cell = ref shape.Voxels[shape.Bounds.Index(warpedPartCoordinates)];
 					var distance = Vector.Between(warpedPartCoordinates.AsVertex(), cell.NearestIntersection).Length;
 
-					var weight = DeviceFunction.Max(0f, 1f - distance / 4);
-					var factor = 
-						(1 - DeviceFunction.Abs(partCoordinates.X - shapePosition.X)) * 
-						(1 - DeviceFunction.Abs(partCoordinates.Y - shapePosition.Y)) * 
+					var weight = DeviceFunction.Max(0f, 1f - distance / 6);
+					var factor =
+						(1 - DeviceFunction.Abs(partCoordinates.X - shapePosition.X)) *
+						(1 - DeviceFunction.Abs(partCoordinates.Y - shapePosition.Y)) *
 						(1 - DeviceFunction.Abs(partCoordinates.Z - shapePosition.Z));
 
 					voxel.Weight += weight * factor;
@@ -58,15 +59,39 @@ namespace RotatingVoxels.Cuda
 		public static void Clear(GpuSpaceInfo space)
 		{
 			Gpu.Default.Launch(ClearKernel, _lunchParams, space);
+			Gpu.Default.Synchronize();
 		}
 
 		private static void ClearKernel(GpuSpaceInfo space)
 		{
-			var start = space.Bounds.Length * (threadIdx.x) / blockDim.x;
-			var end = space.Bounds.Length * (threadIdx.x + 1) / blockDim.x;
+			var start = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x) / blockDim.x / gridDim.x;
+			var end = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x + 1) / blockDim.x / gridDim.x;
 
 			for (int i = start; i < end; i++)
-				space.Voxels.Set(i, new VoxelFace { Weight = 0 });
+				space.Voxels.Set(i, new VoxelFace());
+		}
+
+		public static void Normalize(GpuSpaceInfo space)
+		{
+			Gpu.Default.Launch(NormalizeKernel, _lunchParams, space);
+			Gpu.Default.Synchronize();
+		}
+
+		private static void NormalizeKernel(GpuSpaceInfo space)
+		{
+			var start = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x) / blockDim.x / gridDim.x;
+			var end = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x + 1) / blockDim.x / gridDim.x;
+
+			for (int i = start; i < end; i++)
+			{
+				var value = space.Voxels.Get(i);
+
+				space.Voxels.Set(i, new VoxelFace
+				{
+					Weight = DeviceFunction.Min(1, value.Weight),
+					Normal = value.Normal.Normalize()
+				});
+			}
 		}
 	}
 }

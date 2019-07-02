@@ -52,7 +52,10 @@ namespace RotatingVoxels.Geometry
 		{
 			var length = Length;
 
-			return To(X / Length, Y / Length, Z / Length);
+			if (length != 0)
+				return To(X / length, Y / length, Z / length);
+			else
+				return new Vector();
 		}
 
 		public static Vector operator -(in Vector vectorA)

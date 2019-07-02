@@ -64,7 +64,6 @@ namespace RotatingVoxels.Cuda
 
 		public void Dispose()
 		{
-			Gpu.Default.Synchronize();
 			CUDAInterop.cuGLUnmapBufferObject(_buffer);
 			CUDAInterop.cuGLUnregisterBufferObject(_buffer);
 		}

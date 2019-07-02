@@ -26,7 +26,7 @@ namespace RotatingVoxels
 
 		static NativeWindow window;
 		static ShadingProgram program;
-		static IModel callModel;
+		static IModel cellModel;
 
 		static void Main(string[] args)
 		{
@@ -37,7 +37,7 @@ namespace RotatingVoxels
 				InitializeWindow();
 				InitializeOpenGl();
 
-				callModel = new Box();
+				cellModel = new Box();
 				gpuSpace = new GpuSpace(DiscreteBounds.OfSize(40, 40, 40));
 				program = new ShadingProgram();
 
@@ -63,6 +63,7 @@ namespace RotatingVoxels
 
 					VoxelKernel.Clear(context.Space);
 					VoxelKernel.Sample(gpuShape.Shape, context.Space, Matrix.From(transformation));
+					VoxelKernel.Normalize(context.Space);
 				}
 
 				using (var context = gpuSpace.UseTexture())
@@ -70,7 +71,7 @@ namespace RotatingVoxels
 					program.Transformation = Matrix4x4f.Perspective(60, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 					program.Weights = context.Texture;
 
-					callModel.Draw(gpuSpace.Bounds.Length);
+					cellModel.Draw(gpuSpace.Bounds.Length);
 				}
 			}
 
