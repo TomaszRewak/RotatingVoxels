@@ -30,7 +30,7 @@ namespace RotatingVoxels
 
 		static void Main(string[] args)
 		{
-			gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(40, 40, 40), 5);
+			gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(30, 30, 30), 5);
 
 			using (window = NativeWindow.Create())
 			{
@@ -38,7 +38,7 @@ namespace RotatingVoxels
 				InitializeOpenGl();
 
 				cellModel = new Box();
-				gpuSpace = new GpuSpace(DiscreteBounds.OfSize(40, 40, 40));
+				gpuSpace = new GpuSpace(DiscreteBounds.OfSize(30, 30, 30));
 				program = new ShadingProgram();
 
 				fpsCounter.Start();
@@ -55,7 +55,7 @@ namespace RotatingVoxels
 
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			var worldTransformation = Matrix4x4f.Perspective(60, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+			var worldTransformation = Matrix4x4f.Perspective(40, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 
 			using (program.Use())
 			{

@@ -29,7 +29,7 @@ namespace RotatingVoxels.Cuda
 			{
 				var voxel = space.Voxels.Get(voxelIndex);
 
-				var spaceCoordinates = DiscreteCoordinates.At(voxelIndex % 40, voxelIndex / 40 % 40, voxelIndex / 40 / 40 % 40);
+				var spaceCoordinates = space.Bounds.At(voxelIndex);
 				var spacePosition = spaceCoordinates.AsVertex();
 				var shapePosition = transformation * spacePosition;
 				var shapeCoordinates = DiscreteCoordinates.Floor(shapePosition);
