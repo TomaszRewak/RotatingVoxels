@@ -5,6 +5,7 @@ layout (location = 1) in vec3 aColor;
 
 uniform samplerBuffer weights;
 uniform mat4 transformation;
+uniform vec3 size;
 
 out vec3 fColor;
 out vec3 fPos;
@@ -38,7 +39,12 @@ void main()
 	float weight = texel.r;
 	vec3 normal = -vec3(texel.g, texel.b, texel.a);
 
-	vec4 coordinates = vec4(gl_InstanceID % 40 - 20, gl_InstanceID / 40 % 40 - 20, gl_InstanceID / 40 / 40 % 40 - 20, 20);
+	vec4 coordinates = vec4(
+		gl_InstanceID                             % int(size.x) - size.x / 2, 
+		gl_InstanceID / int(size.x)               % int(size.y) - size.y / 2, 
+		gl_InstanceID / int(size.x) / int(size.y) % int(size.z) - size.z / 2, 
+		size.x);
+
 	mat4 direction = lookAt(normal);
 	vec4 cornerPos = vec4(aPos * weight * 0.3, 20);
 

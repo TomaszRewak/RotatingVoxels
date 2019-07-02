@@ -100,5 +100,10 @@ namespace RotatingVoxels.Resources.Models
 			using (Bind())
 				Gl.DrawElementsInstanced(PrimitiveType.Triangles, indexDataValues.Length, DrawElementsType.UnsignedShort, IntPtr.Zero, times);
 		}
+
+		public void Draw()
+		{
+			Gl.DrawElements(PrimitiveType.Triangles, indexDataValues.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+		}
 	}
 }

@@ -26,7 +26,7 @@ namespace RotatingVoxels
 
 		static NativeWindow window;
 		static ShadingProgram program;
-		static IModel cellModel;
+		static Box cellModel;
 
 		static void Main(string[] args)
 		{
@@ -55,7 +55,9 @@ namespace RotatingVoxels
 
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			using(program.Use())
+			var worldTransformation = Matrix4x4f.Perspective(60, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+
+			using (program.Use())
 			{
 				using (var context = gpuSpace.UseBuffer())
 				{
@@ -68,8 +70,9 @@ namespace RotatingVoxels
 
 				using (var context = gpuSpace.UseTexture())
 				{
-					program.Transformation = Matrix4x4f.Perspective(60, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+					program.Transformation = worldTransformation;
 					program.Weights = context.Texture;
+					program.Bounds = gpuSpace.Bounds;
 
 					cellModel.Draw(gpuSpace.Bounds.Length);
 				}

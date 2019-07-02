@@ -1,4 +1,5 @@
 ﻿using OpenGL;
+using RotatingVoxels.VoxelSpace;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +42,11 @@ namespace RotatingVoxels.Resources.Shaders
 		public uint Weights
 		{
 			set => Gl.Uniform1i(Gl.GetUniformLocation(_program, "weights"), 1, value);
+		}
+
+		public DiscreteBounds Bounds
+		{
+			set => Gl.Uniform3f(Gl.GetUniformLocation(_program, "size"), 1, new Vertex3f(value.Width, value.Height, value.Depth));
 		}
 
 		private void Validate()
