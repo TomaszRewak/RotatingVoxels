@@ -19,73 +19,49 @@ namespace RotatingVoxels
 {
 	static class RotatingVoxels
 	{
-		static FpsCounter fpsCounter = new FpsCounter();
+		static FpsCounter _fpsCounter = new FpsCounter();
+		static Stopwatch _timer = new Stopwatch();
+		static NativeWindow _window;
 
-		static GpuShape gpuShape;
-		static GpuSpace gpuSpace;
-
-		static NativeWindow window;
-		static ShadingProgram program;
-		static Box cellModel;
+		static IScene _scene;
 
 		static void Main(string[] args)
 		{
-			gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(30, 30, 30), 5);
+			_scene = new BunnyScene();
+			_scene.Load();
 
-			using (window = NativeWindow.Create())
+			using (_window = NativeWindow.Create())
 			{
 				InitializeWindow();
 				InitializeOpenGl();
 
-				cellModel = new Box();
-				gpuSpace = new GpuSpace(DiscreteBounds.OfSize(30, 30, 30));
-				program = new ShadingProgram();
+				_scene.Initialize();
 
-				fpsCounter.Start();
+				_fpsCounter.Start();
+				_timer.Start();
 
-				window.Show();
-				window.Run();
+				_window.Show();
+				_window.Run();
 			}
 		}
 
 		static int iteration = 0;
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
-			fpsCounter.Tick();
+			_fpsCounter.Tick();
 
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			var worldTransformation = Matrix4x4f.Perspective(40, 1f * window.Width / window.Height, 0.001f, 100000f) * Matrix4x4f.LookAt(new Vertex3f(0.2f, -0.5f * (float)Math.Sin(iteration * 0.005), -1), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
-
-			using (program.Use())
-			{
-				using (var context = gpuSpace.UseBuffer())
-				{
-					var transformation = Matrix4x4f.Translated(iteration * 0.1f, 0, 0) * Matrix4x4f.RotatedZ(iteration * 0.1f);
-
-					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(gpuShape.Shape, context.Space, Matrix.From(transformation));
-					VoxelKernel.Normalize(context.Space);
-				}
-
-				using (var context = gpuSpace.UseTexture())
-				{
-					program.Transformation = worldTransformation;
-					program.Weights = context.Texture;
-					program.Bounds = gpuSpace.Bounds;
-
-					cellModel.Draw(gpuSpace.Bounds.Length);
-				}
-			}
+			_scene.Draw(_window.Width, _window.Height, _timer.Elapsed);
 
 			iteration++;
 		}
 
 		private static void InitializeWindow()
 		{
-			window.DepthBits = 24;
-			window.Create(100, 100, 1200, 800, NativeWindowStyle.None);
-			window.Render += Render;
+			_window.DepthBits = 24;
+			_window.Create(100, 100, 1200, 800, NativeWindowStyle.None);
+			_window.Render += Render;
 		}
 
 		private static void InitializeOpenGl()

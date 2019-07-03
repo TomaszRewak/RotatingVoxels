@@ -37,20 +37,33 @@ void main()
 	vec4 texel = texelFetch(weights, gl_InstanceID);
 
 	float weight = texel.r;
-	vec3 normal = -vec3(texel.g, texel.b, texel.a);
+	vec3 normal = vec3(texel.g, texel.b, texel.a);
+
+	int x = gl_InstanceID                             % int(size.x);
+	int y = gl_InstanceID / int(size.x)               % int(size.y);
+	int z = gl_InstanceID / int(size.x) / int(size.y) % int(size.z);
 
 	vec4 coordinates = vec4(
-		gl_InstanceID                             % int(size.x) - size.x / 2, 
-		gl_InstanceID / int(size.x)               % int(size.y) - size.y / 2, 
-		gl_InstanceID / int(size.x) / int(size.y) % int(size.z) - size.z / 2, 
+		x - size.x / 2, 
+		y - size.y / 2, 
+		z - size.z / 2, 
 		size.x);
+
+	if (x % 5 == 0 && y % 5 == 0)
+	{
+		fWeight = weight = max(weight, 0.2);
+		fColor = aColor;
+	}
+	else
+	{	
+		fWeight = weight;
+		fColor = aColor * 0.5;
+	}
 
 	mat4 direction = lookAt(normal);
 	vec4 cornerPos = vec4(aPos * weight * 0.3, 20);
 
     gl_Position = transformation * (coordinates + direction * cornerPos);
 	
-    fColor = aColor;
 	fPos = aPos;
-	fWeight = weight;
 } 

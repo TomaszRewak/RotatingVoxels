@@ -55,7 +55,7 @@ namespace RotatingVoxels.Geometry
 			if (length != 0)
 				return To(X / length, Y / length, Z / length);
 			else
-				return new Vector();
+				return To(0, 0, -1);
 		}
 
 		public static Vector operator -(in Vector vectorA)

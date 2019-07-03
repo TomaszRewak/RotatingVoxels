@@ -21,8 +21,8 @@ void main()
     else
         d = max(ax, ay);
 
-    d = min(1, max(0, d + 0.25 / fWeight - 1) * fWeight * 4);
+    d = min(1, max(0, d + 0.5 / fWeight - 1) * fWeight );
         
-    gl_FragColor = vec4(fColor, 1.0) * (1 - d);  
+    gl_FragColor = vec4(fColor, 1.0) * (1 - d); 
         
 }
