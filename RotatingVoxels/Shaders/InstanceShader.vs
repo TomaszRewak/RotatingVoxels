@@ -53,12 +53,12 @@ void main()
 	{
 		fWeight = weight = max(weight, 0.2);
 		fColor = aColor * vec3(1.0, 0.5, 0.5);
-	}
-	else
+	} else
 	{	
 		fWeight = weight;
 		fColor = aColor;
 	}
+
 
 	mat4 direction = lookAt(normal);
 	vec4 cornerPos = vec4(aPos * weight * 0.3, 20);

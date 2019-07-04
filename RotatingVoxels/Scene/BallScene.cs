@@ -31,8 +31,8 @@ namespace RotatingVoxels.Scene
 					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0);
 
 					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 2);
-					VoxelKernel.Normalize(context.Space, revert: false);
+					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 2, revert: false);
+					VoxelKernel.Normalize(context.Space);
 				}
 
 				using (var context = _gpuSpace.UseTexture())

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RotatingVoxels.Scene
 {
-	class BunnyScene : IScene
+	class MultiShapeScene : IScene
 	{
 		private GpuSpace _gpuSpace;
 		private GpuShape _gpuShape;
@@ -28,10 +28,12 @@ namespace RotatingVoxels.Scene
 			{
 				using (var context = _gpuSpace.UseBuffer())
 				{
-					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0);
+					var transformation1 = Matrix4x4f.Translated(0, 0, progress * 3);
+					var transformation2 = Matrix4x4f.Translated(0, progress * 3, 0);
 
 					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 3, revert: true);
+					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation1), maxDistance: 3, revert: false);
+					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation2), maxDistance: 3, revert: false);
 					VoxelKernel.Normalize(context.Space);
 				}
 
@@ -48,9 +50,9 @@ namespace RotatingVoxels.Scene
 
 		private Matrix4x4f GetWorldTransformation(float width, float height, float progress)
 		{
-			return 
+			return
 				Matrix4x4f.Perspective(40, 1f * width / height, 0.001f, 100000f) *
-				Matrix4x4f.LookAt(new Vertex3f((float)Math.Sin(progress * 0.08), -0.4f, (float)Math.Cos(progress * 0.08)), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
+				Matrix4x4f.LookAt(new Vertex3f((float)Math.Sin(progress * 0.3), -0.4f, (float)Math.Cos(progress * 0.3)), new Vertex3f(0, 0, 0), new Vertex3f(0, -1, 0));
 		}
 
 		public void Initialize()
@@ -62,7 +64,7 @@ namespace RotatingVoxels.Scene
 
 		public void Load()
 		{
-			_gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(30, 30, 30), 5);
+			_gpuShape = ShapeLoader.LoadShape("./Examples/ball.stl", DiscreteBounds.OfSize(30, 30, 30), 10);
 		}
 	}
 }
