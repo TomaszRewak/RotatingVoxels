@@ -25,6 +25,8 @@ namespace RotatingVoxels.Cuda
 			var start = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x) / blockDim.x / gridDim.x;
 			var end = space.Bounds.Length * (blockIdx.x * blockDim.x + threadIdx.x + 1) / blockDim.x / gridDim.x;
 
+			var inversedTransformation = transformation.Inverse();
+
 			for (int voxelIndex = start; voxelIndex < end; voxelIndex++)
 			{
 				var voxel = space.Voxels.Get(voxelIndex);
@@ -41,6 +43,10 @@ namespace RotatingVoxels.Cuda
 
 					ref var cell = ref shape.Voxels[shape.Bounds.Index(warpedPartCoordinates)];
 					var distance = Vector.Between(warpedPartCoordinates.AsVertex(), cell.NearestIntersection).Length;
+					var normal = Vector.Between(
+						spacePosition,
+						inversedTransformation * (shapePosition + cell.Normal)
+					).Normalize();
 
 					var weight = DeviceFunction.Max(0f, 1f - distance / maxDistance);
 					var factor =
@@ -49,7 +55,7 @@ namespace RotatingVoxels.Cuda
 						(1 - DeviceFunction.Abs(partCoordinates.Z - shapePosition.Z));
 
 					voxel.Weight += weight * factor;
-					voxel.Normal += cell.Normal * factor;
+					voxel.Normal += normal * factor;
 				}
 
 				space.Voxels.Set(voxelIndex, voxel);

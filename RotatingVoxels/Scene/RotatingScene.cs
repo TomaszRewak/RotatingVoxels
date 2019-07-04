@@ -28,10 +28,10 @@ namespace RotatingVoxels.Scene
 			{
 				using (var context = _gpuSpace.UseBuffer())
 				{
-					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0) * Matrix4x4f.RotatedZ(progress * 12f) * Matrix4x4f.RotatedY(progress * 2f);
+					var transformation = Matrix4x4f.Translated((float)Math.Sin(progress * 0.01) * 400f, 0, 0) * Matrix4x4f.RotatedZ(progress * 15f) * Matrix4x4f.RotatedY(progress * 4f);
 
 					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 3);
+					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 5);
 					VoxelKernel.Normalize(context.Space, revert: true);
 				}
 
