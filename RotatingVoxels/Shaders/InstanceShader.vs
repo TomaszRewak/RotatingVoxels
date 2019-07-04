@@ -52,12 +52,12 @@ void main()
 	if (x % 5 == 0 && y % 5 == 0)
 	{
 		fWeight = weight = max(weight, 0.2);
-		fColor = aColor;
+		fColor = aColor * vec3(1.0, 0.5, 0.5);
 	}
 	else
 	{	
 		fWeight = weight;
-		fColor = aColor * 0.5;
+		fColor = aColor;
 	}
 
 	mat4 direction = lookAt(normal);

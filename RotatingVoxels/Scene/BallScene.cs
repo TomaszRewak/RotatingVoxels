@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RotatingVoxels.Scene
 {
-	class BunnyScene : IScene
+	class BallScene : IScene
 	{
 		private GpuSpace _gpuSpace;
 		private GpuShape _gpuShape;
@@ -31,8 +31,8 @@ namespace RotatingVoxels.Scene
 					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0);
 
 					VoxelKernel.Clear(context.Space);
-					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 3);
-					VoxelKernel.Normalize(context.Space, revert: true);
+					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 2);
+					VoxelKernel.Normalize(context.Space, revert: false);
 				}
 
 				using (var context = _gpuSpace.UseTexture())
@@ -62,7 +62,7 @@ namespace RotatingVoxels.Scene
 
 		public void Load()
 		{
-			_gpuShape = ShapeLoader.LoadShape("./Examples/bunny.stl", DiscreteBounds.OfSize(30, 30, 30), 5);
+			_gpuShape = ShapeLoader.LoadShape("./Examples/ball.stl", DiscreteBounds.OfSize(30, 30, 30), 5);
 		}
 	}
 }

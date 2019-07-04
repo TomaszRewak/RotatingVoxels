@@ -27,7 +27,9 @@ namespace RotatingVoxels
 
 		static void Main(string[] args)
 		{
-			_scene = new BunnyScene();
+			//_scene = new BunnyScene();
+			//_scene = new BallScene();
+			_scene = new RotatingScene();
 			_scene.Load();
 
 			using (_window = NativeWindow.Create())
@@ -45,7 +47,6 @@ namespace RotatingVoxels
 			}
 		}
 
-		static int iteration = 0;
 		private static void Render(object sender, NativeWindowEventArgs e)
 		{
 			_fpsCounter.Tick();
@@ -53,8 +54,6 @@ namespace RotatingVoxels
 			Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			_scene.Draw(_window.Width, _window.Height, _timer.Elapsed);
-
-			iteration++;
 		}
 
 		private static void InitializeWindow()
@@ -66,7 +65,7 @@ namespace RotatingVoxels
 
 		private static void InitializeOpenGl()
 		{
-			Gl.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			Gl.ClearColor(0.05f, 0.1f, 0.15f, 1.0f);
 			Gl.ClearDepth(1.0f);
 			Gl.Enable(EnableCap.DepthTest);
 			Gl.DepthFunc(DepthFunction.Lequal);

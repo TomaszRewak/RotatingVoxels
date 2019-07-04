@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RotatingVoxels.Scene
 {
-	class BunnyScene : IScene
+	class RotatingScene : IScene
 	{
 		private GpuSpace _gpuSpace;
 		private GpuShape _gpuShape;
@@ -28,7 +28,7 @@ namespace RotatingVoxels.Scene
 			{
 				using (var context = _gpuSpace.UseBuffer())
 				{
-					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0);
+					var transformation = Matrix4x4f.Translated(progress * 2f, 0, 0) * Matrix4x4f.RotatedZ(progress * 12f) * Matrix4x4f.RotatedY(progress * 2f);
 
 					VoxelKernel.Clear(context.Space);
 					VoxelKernel.Sample(_gpuShape.Shape, context.Space, Matrix.From(transformation), maxDistance: 3);

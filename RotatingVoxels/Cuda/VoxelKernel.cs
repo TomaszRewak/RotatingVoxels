@@ -12,7 +12,7 @@ namespace RotatingVoxels.Cuda
 {
 	class VoxelKernel
 	{
-		private static LaunchParam _lunchParams = new LaunchParam(8, 256);
+		private static LaunchParam _lunchParams = new LaunchParam(32, 256);
 
 		public static void Sample(GpuShapeInfo shape, GpuSpaceInfo space, Matrix transformation, float maxDistance)
 		{

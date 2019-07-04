@@ -98,6 +98,8 @@
     <Compile Include="Geometry\Bounds.cs" />
     <Compile Include="Resources\Shaders\ShadingProgram.cs" />
     <Compile Include="Resources\Shaders\Shader.cs" />
+    <Compile Include="Scene\BallScene.cs" />
+    <Compile Include="Scene\RotatingScene.cs" />
     <Compile Include="Scene\BunnyScene.cs" />
     <Compile Include="Scene\IScene.cs" />
     <Compile Include="Scene\ShapeLoader.cs" />
