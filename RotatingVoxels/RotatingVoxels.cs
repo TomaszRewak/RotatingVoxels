@@ -28,8 +28,8 @@ namespace RotatingVoxels
 		static void Main(string[] args)
 		{
 			//_scene = new BunnyScene();
-			_scene = new BallScene();
-			//_scene = new RotatingScene();
+			//_scene = new BallScene();
+			_scene = new RotatingScene();
 			//_scene = new MultiShapeScene();
 			_scene.Load();
 
