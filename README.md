@@ -1,6 +1,6 @@
 # RotatingVoxels
 
-In this project I've used C# combined with Alea GPU and OpenGL.Net to create a simple, hardware-accelerated, 3d animation of rotating cubes.
+In this project I've used C# combined with Alea GPU and OpenGL.Net to create a simple, hardware-accelerated, 3d animation of rotating cubes. (More details cen be found here: https://www.youtube.com/watch?v=oOUW2xM0GMM)
 
 <p align="center">
   <img src="https://github.com/TomaszRewak/RotatingVoxels/blob/master/About/rotating-voxels.gif?raw=true" width=400/>
